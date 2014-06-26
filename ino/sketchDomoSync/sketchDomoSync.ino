@@ -62,7 +62,7 @@ public:
     UNUSED(type);
     m_count += 1;
     int pin = get_pin();
-    trace << RESPONSE_START_CHAR << clientMaster << pin << RESPONSE_END_STRING;
+    trace << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING);
   }
 };
 
@@ -72,7 +72,7 @@ void setup() {
   
   // Initialisation variable
   RTC::begin();
-  Watchdog::begin();
+  Watchdog::begin(16, Watchdog::push_timeout_events);
   lastMicros = RTC::micros();
   uart.begin(BAUD_RATE);
   trace.begin(&uart); //, PSTR("Cosa UART: started"));
@@ -296,7 +296,6 @@ void cmdGetPinStatus(char* cmd, int len) {
 void cmdAnalogSet(char* cmd, int len) {
   if (len > 4) {
     int pin = (int)cmd[2];
-    uint8_t value = (uint8_t)cmd[3];
     if (pinTable[pin] != NULL) delete(pinTable[pin]); 
     PWMPin* tmp= new PWMPin((Board::PWMPin)pin);
     pinTable[pin] = tmp;
