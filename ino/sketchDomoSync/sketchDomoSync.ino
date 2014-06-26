@@ -81,6 +81,7 @@ void setup() {
   getID(id);
   if (id[0] != 'D') {
     generateID();
+    getID(id);
   }
 
 }
@@ -88,7 +89,7 @@ void setup() {
 void loop() {
   
   Event event;
-  Event::queue.await(&event);
+ // Event::queue.await(&event);
   event.dispatch();
   // calculate the elapsed time since last circle
   unsigned long currentMicros = RTC::micros();
@@ -107,18 +108,17 @@ void loop() {
   {
     pos++;
   }
+  
   // extract complete command
   if (pos < len) {
     {
       int taille = 1;
       char cmd[10];
       cmd[0] = z;
-      trace << cmd[0];
       while ((z = uart.getchar()) != '\n')
      
       { 
         cmd[taille] = z;
-        trace << cmd[taille];
         taille++;
       }
       processCommand(cmd, taille+1);
@@ -163,7 +163,6 @@ void generateID() {
   for (int i = 0; i < EEPROM_SIZE - 1; i ++) {
     c = buf.getchar();
     eeprom.write(&idGen[i], &c, sizeof(char)) ;
-    trace << c;
   }
   c = 0xff;
   eeprom.write(&idGen[EEPROM_SIZE - 1], &c, sizeof(char));
