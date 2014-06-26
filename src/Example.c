@@ -13,35 +13,41 @@ int main(int argc, char **argv)
 
 setShowLogs(1);
 
-DomoDevice dev = attachDomoDevice ("DomoSy-Arduino-8823-3600");
+DomoDevice dev = attachDomoDevice ("DomoSy-Arduino-5141-9267");
 
-if (dev.fd != -1)
+DomoDevice dev2 = attachDomoDevice ("DomoSy-Arduino-1633-3668");
+if (dev.fd != -1 && dev2.fd != -1 )
 {
-setPinModeAsOutput (&dev, 23);
+setPinModeAsOutput (&dev, 22);
+setPinModeAsInput (&dev2, 22);
+setPinModeAsOutput (&dev2, 23);
 int i = 0;
-for (i = 0; i < 5; i ++)
+/*for (i = 0; i < 5; i ++)
 {
 setPinHigh (&dev, 23);
-
+setPinLow (&dev2, 23);
 sleep(2);
 
+setPinHigh (&dev2, 23);
 setPinLow (&dev, 23);
-
 sleep(2);
-}
 
-setPinModeAsInput (&dev, 47);
 
-printf("Pin 9 status=%d\n", getPinStatus(&dev, 47));
 
+}*/
+setPinHigh (&dev, 22);
+
+printf("Pin status=%d\n", getPinStatus(&dev2, 22));
+ if (getPinStatus(&dev2, 22)==1) 
 sleep(1);
-setPinHigh (&dev, 23);
+setPinHigh (&dev2, 23);
 sleep(2);
 setPinLow (&dev, 23);
 
 
 
 detachDomoDevice (&dev);
+detachDomoDevice (&dev2);
 }
 else
 {
