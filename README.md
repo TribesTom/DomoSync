@@ -2,7 +2,7 @@ DomoSync
 ========
 DomoSync is a logicel suite to enhance my domotic installation.
 
-It contain  : 
+It contains  : 
 
 Arduino code using Cosa libraries : https://github.com/mikaelpatel/Cosa
 
