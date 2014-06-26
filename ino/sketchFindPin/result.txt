@@ -1,0 +1,60 @@
+CosaUART: started (LINE MODE)
+Pin D0 :0
+Pin D1 :1
+Pin D2 :4
+Pin D3 :5
+Pin D4 :85
+Pin D5 :3
+Pin D6 :11
+Pin D7 :12
+Pin D8 :13
+Pin D9 :14
+Pin D10 :20
+Pin D11 :21
+Pin D12 :22
+Pin D13 :23
+Pin D14 :73
+Pin D15 :72
+Pin D16 :9
+Pin D17 :8
+Pin D18 :43
+Pin D19 :42
+Pin D20 :41
+Pin D21 :40
+Pin D22 :24
+Pin D23 :25
+Pin D24 :26
+Pin D25 :27
+Pin D26 :28
+Pin D27 :29
+Pin D28 :30
+Pin D29 :31
+Pin D30 :39
+Pin D31 :38
+Pin D32 :37
+Pin D33 :36
+Pin D34 :35
+Pin D35 :34
+Pin D36 :33
+Pin D37 :32
+Pin D38 :47
+Pin D39 :82
+Pin D40 :81
+Pin D41 :80
+Pin D42 :55
+Pin D43 :54
+Pin D44 :53
+Pin D45 :52
+Pin D46 :51
+Pin D47 :50
+Pin D48 :49
+Pin D49 :48
+Pin D50 :19
+Pin D51 :18
+Pin D52 :17
+Pin D53 :16
+78:void loop():assert:true == false
+
+U0\r\n
+U2+8\r\n
+U5+8\r\n
