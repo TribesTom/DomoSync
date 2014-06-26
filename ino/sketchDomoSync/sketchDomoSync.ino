@@ -69,7 +69,7 @@ public:
 
 void setup() {
 
-
+  
   // Initialisation variable
   RTC::begin();
   Watchdog::begin();
@@ -86,6 +86,10 @@ void setup() {
 }
 
 void loop() {
+  
+  Event event;
+  Event::queue.await(&event);
+  event.dispatch();
   // calculate the elapsed time since last circle
   unsigned long currentMicros = RTC::micros();
   elapsedMicros = currentMicros > lastMicros ? currentMicros - lastMicros : 4294967295 - lastMicros + currentMicros;
