@@ -7,13 +7,15 @@
 #include <unistd.h>
 
 #include "../src/Domo.h"
+#include "../src/mappin/mega2560.h"
+
 
 int main(int argc, char **argv)
 {
 
     setShowLogs(1);
 
-    DomoDevice dev = attachDomoDevice ("DomoSy-Arduino-5141-9267");
+    DomoDevice dev = attachDomoDevice ("DomoSy-Arduino-1633-3668");
 
 
     if (dev.fd != -1 )
@@ -22,7 +24,7 @@ int main(int argc, char **argv)
         char* response;
         int errorcode;
         response=waitForStringBlock(&dev, &errorcode);
-        if (atoi(response[0])==12)
+        if (atoi(response)==12)
         {
             setPinModeAsOutput (&dev, pinMap[13]); // for debug
 			sleep(1);

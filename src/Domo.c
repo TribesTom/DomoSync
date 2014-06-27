@@ -236,9 +236,6 @@ char * waitForStringBlock(DomoDevice *dev, int * errorCode)
 	int errCode = 0;
 	char * buffer = malloc (MAX_MSG_SIZE + 1);
 	int bytes = 0;
-	struct timespec ts;
-    ts.tv_sec = time(0) + 2;
-    ts.tv_nsec = 0;
 	if ((bytes = mq_receive (dev->out, buffer, MAX_MSG_SIZE, NULL)) == -1)
     {
         

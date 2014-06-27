@@ -384,10 +384,11 @@ int openOneDevice(char* devicePath, char* d_name)
 }
 int searchTarget( char *part )
 {
-    DeviceOpen *devPointeur = ListDevice;
     pthread_mutex_lock(&mutexDevice);
+    
     if ( ListDevice != NULL )
     {
+        DeviceOpen *devPointeur = ListDevice;
         while ( strcmp(part,devPointeur->id ) !=0 )
         {
             if ( devPointeur->next != NULL) devPointeur= devPointeur->next;
@@ -548,7 +549,7 @@ int main(int argc, char **argv)
                     char fdBuf[16];
                     memset (fdBuf, 0, sizeof fdBuf);
                     sprintf (fdBuf,"%d", fdTarget);
-                    mq_send (CliList[clientId].mq, fdBuf , strlen (fdBuf), 0);
+                    if (CliList[clientId].mq != (mqd_t) -1 ) mq_send (CliList[clientId].mq, fdBuf , strlen (fdBuf), 0);
                     break;
                     //Close Client
                 case MSG_CLOSE_DEVICE:

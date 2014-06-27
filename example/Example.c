@@ -19,6 +19,7 @@ DomoDevice dev2 = attachDomoDevice ("DomoSy-Arduino-1633-3668");
 if (dev.fd != -1 && dev2.fd != -1 )
 {
 setPinModeAsOutput (&dev, 22);
+setPinModeAsOutput (&dev, 23);
 setPinModeAsInput (&dev2, 22);
 setPinModeAsOutput (&dev2, 23);
 int i = 0;
@@ -35,11 +36,12 @@ sleep(2);
 
 
 }*/
+setPinHigh (&dev, 23);
+ sleep(2);
 setPinHigh (&dev, 22);
-
+setPinLow (&dev, 23);
 printf("Pin status=%d\n", getPinStatus(&dev2, 22));
  if (getPinStatus(&dev2, 22)==1) 
-sleep(1);
 setPinHigh (&dev2, 23);
 sleep(2);
 setPinLow (&dev, 23);

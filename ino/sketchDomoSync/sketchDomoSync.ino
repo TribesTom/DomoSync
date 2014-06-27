@@ -90,7 +90,7 @@ void loop() {
   
   Event event;
  // Event::queue.await(&event);
-  event.dispatch();
+  
   // calculate the elapsed time since last circle
   unsigned long currentMicros = RTC::micros();
   elapsedMicros = currentMicros > lastMicros ? currentMicros - lastMicros : 4294967295 - lastMicros + currentMicros;
@@ -100,6 +100,7 @@ void loop() {
   int len;
   while (( len = uart.peekchar('\n')) < 0) {
     Watchdog::delay(10);
+    event.dispatch();
   }
   int pos = 0;
   char z;
