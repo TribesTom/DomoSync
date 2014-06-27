@@ -554,6 +554,7 @@ int main(int argc, char **argv)
                 case MSG_CLOSE_DEVICE:
                     clientStatus[clientId] = 0;
                     CliList[clientId].id=0;
+					mq_close(CliList[clientId].mq);
                     break;
                 case MSG_SET_PIN_OUTPUT:
                     sendCommand(CMD_SET_PIN_OUTPUT, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
