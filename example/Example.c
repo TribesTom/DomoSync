@@ -6,7 +6,7 @@
 #include <mqueue.h>
 #include <unistd.h>
 
-#include "Domo.h"
+#include "../src/Domo.h"
 
 int main(int argc, char **argv)
 {

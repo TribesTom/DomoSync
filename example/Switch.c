@@ -5,8 +5,8 @@
 #include <sys/types.h>
 #include <mqueue.h>
 #include <unistd.h>
-#include "Domo.h"
-#include "mappin/mega2560.h"
+#include "../src/Domo.h"
+#include "../src/mappin/mega2560.h"
 
 	
 int main(int argc, char **argv)
