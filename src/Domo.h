@@ -104,4 +104,6 @@ extern int readDHT11(DomoDevice *dev, int pin);
  */
 extern float readSR04(DomoDevice *dev, int trigPin, int echoPin);
 
+extern char * waitForStringBlock(DomoDevice *dev, int * errorCode);
+
 extern void cleanupDomo ();
