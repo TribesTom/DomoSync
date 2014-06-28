@@ -20,11 +20,12 @@ int main(int argc, char **argv)
 
     if (dev.fd != -1 )
     {
+      setMasterButton(&dev, pinMap[12]);
         setPinAsButton(&dev, pinMap[12]);
         char* response;
         int errorcode;
         response=waitForStringBlock(&dev, &errorcode);
-        if (atoi(response)==12)
+        if (atoi(response)==pinMap[12])
         {
             setPinModeAsOutput (&dev, pinMap[13]); // for debug
 			sleep(1);

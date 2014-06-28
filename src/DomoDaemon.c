@@ -284,15 +284,19 @@ void *deviceOpener(void *arg)
         // cleanup
         serialClose (devOpen->fd);
     }
-    syslog (LOG_INFO, "Thread Device %d : Terminated device opener for: %s (fd=%d)",thID,devOpen->id, devOpen->fd);
+    syslog (LOG_INFO, "Thread Device %d : Terminated device opener for: %s (fd=%d)",thID,devOpen->devName, devOpen->fd);
     pthread_mutex_lock (&mutexDevice);
-    if (devOpen->prev != NULL ) devOpen->prev->next= devOpen->next;
-    else if (devOpen->next != NULL )  ListDevice = devOpen->next;
-    else ListDevice=NULL;
-    free (devOpen->id);
+    if (devOpen->prev != NULL && devOpen->next != NULL ) {
+      devOpen->prev->next = devOpen->next;
+      devOpen->next->prev = devOpen->prev;
+    }
+    else if (devOpen->prev == NULL && devOpen->next != NULL )  ListDevice = devOpen->next;
+    else ListDevice = NULL;
+    if(devOpen->id != NULL ) free (devOpen->id);
     free (devOpen->devName);
     free (devOpen);
     pthread_mutex_unlock(&mutexDevice);
+    syslog (LOG_INFO, "Thread Device %d : Terminated FREE device",thID);
     return NULL;
 }
 
@@ -371,13 +375,13 @@ int openOneDevice(char* devicePath, char* d_name)
         serialWriteString (fd, getIdCmd);
         syslog (LOG_INFO, "Thread Device %d : Send getID command for deive: %s command : %d,%d,%d,%d,%d\n",thID, d_name,getIdCmd[0],getIdCmd[1],getIdCmd[2],getIdCmd[3],getIdCmd[4]);
         serialFlush (fd);
-		free(devicePath);
-		free(d_name);
+	if(devicePath != NULL ) free(devicePath);
+	if(d_name != NULL ) free(d_name);
 	return 1;
     } else {
       syslog (LOG_INFO, "Thread Device %d : Could not open serial deive: %s\n",thID, d_name);
-      free(devicePath);
-	  free(d_name);
+      	if(devicePath != NULL ) free(devicePath);
+        if(d_name != NULL )free(d_name);
       
 		return -1;
     }

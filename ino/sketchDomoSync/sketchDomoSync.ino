@@ -36,40 +36,44 @@ EEPROM eeprom;
 char idGen[EEPROM_SIZE] EEMEM;
 
 // client master for button interuption
-int clientMaster=-1;
+char clientMaster = -1;
 
 // Pin variable
 Pin* pinTable[100];
 AnalogPin* analogPinTabble[16];
 char id[EEPROM_SIZE];
 
-void* operator new(size_t size) { return malloc(size); }
-void operator delete(void* ptr) { if (ptr) free(ptr); }
+void* operator new(size_t size) {
+  return malloc(size);
+}
+void operator delete(void* ptr) {
+  if (ptr) free(ptr);
+}
 
 // Classe for button
 class PushButton : public Button {
-private:
-  uint8_t m_count;
-public:
-  PushButton(Board::DigitalPin pin, Button::Mode mode) :
-    Button(pin, mode),
-    m_count(0)
-  {
-  }
+  private:
+    uint8_t m_count;
+  public:
+    PushButton(Board::DigitalPin pin, Button::Mode mode) :
+      Button(pin, mode),
+      m_count(0)
+    {
+    }
 
-  virtual void on_change(uint8_t type)
-  {
-    UNUSED(type);
-    m_count += 1;
-    int pin = get_pin();
-    trace << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING);
-  }
+    virtual void on_change(uint8_t type)
+    {
+      UNUSED(type);
+      m_count += 1;
+      int pin = get_pin();
+      trace << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING);
+    }
 };
 
 
 void setup() {
 
-  
+
   // Initialisation variable
   RTC::begin();
   Watchdog::begin(16, Watchdog::push_timeout_events);
@@ -87,10 +91,10 @@ void setup() {
 }
 
 void loop() {
-  
+
   Event event;
- // Event::queue.await(&event);
-  
+  if(Event::queue.available()>0 ) Event::queue.await(&event); //Event::queue.await(&event);
+  event.dispatch();
   // calculate the elapsed time since last circle
   unsigned long currentMicros = RTC::micros();
   elapsedMicros = currentMicros > lastMicros ? currentMicros - lastMicros : 4294967295 - lastMicros + currentMicros;
@@ -98,33 +102,31 @@ void loop() {
 
   // listen to incoming commands
   int len;
-  while (( len = uart.peekchar('\n')) < 0) {
-    Watchdog::delay(10);
-    event.dispatch();
-  }
-  int pos = 0;
-  char z;
-  // drop useless data
-  while ( (z = uart.getchar()) != COMMAND_START_CHAR && pos < len)
-  {
-    pos++;
-  }
-  
-  // extract complete command
-  if (pos < len) {
+  if (( len = uart.peekchar('\n')) >= 0) {
+    int pos = 0;
+    char z;
+    // drop useless data
+    while ( (z = uart.getchar()) != COMMAND_START_CHAR && pos < len)
     {
-      int taille = 1;
-      char cmd[10];
-      cmd[0] = z;
-      while ((z = uart.getchar()) != '\n')
-     
-      { 
-        cmd[taille] = z;
-        taille++;
+      pos++;
+    }
+
+    // extract complete command
+    if (pos < len) {
+      {
+        int taille = 1;
+        char cmd[10];
+        cmd[0] = z;
+        while ((z = uart.getchar()) != '\n')
+
+        {
+          cmd[taille] = z;
+          taille++;
+        }
+        processCommand(cmd, taille + 1);
+
+
       }
-      processCommand(cmd, taille+1);
-   
-      
     }
   }
 }
@@ -139,7 +141,7 @@ char* getID(char *id) {
       return id;
     }
     id[i] = x;
-    
+
   }
   return id;
 }
@@ -158,7 +160,7 @@ void generateID() {
 
   // Generate ID in buffer
   cout << PSTR(ID_PREFIX) << part1  << '-' << part2;
-  
+
   // Wrire Buffer to memory
   char c;
   for (int i = 0; i < EEPROM_SIZE - 1; i ++) {
@@ -171,7 +173,7 @@ void generateID() {
 }
 
 void processCommand(char *cmd, int len) {
-  
+
   // Command processing
   if (len > 3) {
     int cmdId = cmd[1];
@@ -238,7 +240,7 @@ void cmdGetID(char* cmd, int len) {
 void cmdPinModeOutput(char* cmd, int len) {
   if (len > 4) {
     int pin = (int)cmd[2];
-    if (pinTable[pin] != NULL) delete(pinTable[pin]); 
+    if (pinTable[pin] != NULL) delete(pinTable[pin]);
     OutputPin* tmp = new OutputPin((Board::DigitalPin)pin, 0);
     pinTable[pin] = tmp;
   }
@@ -249,8 +251,8 @@ void cmdPinModeOutput(char* cmd, int len) {
 void cmdPinModeInput(char* cmd, int len) {
   if (len > 4) {
     int pin = (int)cmd[2];
-    if (pinTable[pin] != NULL) delete(pinTable[pin]); 
-    InputPin* tmp= new InputPin((Board::DigitalPin)pin);
+    if (pinTable[pin] != NULL) delete(pinTable[pin]);
+    InputPin* tmp = new InputPin((Board::DigitalPin)pin);
     pinTable[pin] = tmp;
   }
 }
@@ -260,9 +262,9 @@ void cmdPinModeInput(char* cmd, int len) {
 void cmdSetPinUp(char* cmd, int len) {
   if (len > 4) {
     int pin = (int)cmd[2];
-    if(pinTable[pin] != NULL ) {
-    OutputPin* tmp = (OutputPin*)pinTable[pin];
-    tmp->write(1);
+    if (pinTable[pin] != NULL ) {
+      OutputPin* tmp = (OutputPin*)pinTable[pin];
+      tmp->write(1);
     }
   }
 }
@@ -272,9 +274,9 @@ void cmdSetPinUp(char* cmd, int len) {
 void cmdSetPinDown(char* cmd, int len) {
   if (len > 4) {
     int pin = (int)cmd[2];
-    if(pinTable[pin] != NULL ) {
-    OutputPin* tmp = (OutputPin*)pinTable[pin];
-    tmp->write(0);
+    if (pinTable[pin] != NULL ) {
+      OutputPin* tmp = (OutputPin*)pinTable[pin];
+      tmp->write(0);
     }
   }
 }
@@ -285,21 +287,21 @@ void cmdGetPinStatus(char* cmd, int len) {
   if (len > 4) {
     int pin = (int)cmd[2];
     char clientId = cmd[3];
-    if(pinTable[pin] != NULL ){ 
-    InputPin* tmp = (InputPin*)pinTable[pin];
-    trace << RESPONSE_START_CHAR << clientId << tmp->read() << PSTR(RESPONSE_END_STRING);
+    if (pinTable[pin] != NULL ) {
+      InputPin* tmp = (InputPin*)pinTable[pin];
+      trace << RESPONSE_START_CHAR << clientId << tmp->read() << PSTR(RESPONSE_END_STRING);
     }
-  } 
+  }
 }
 // command to set PWM pin
 // example: 55 41 09 0D 0A
 void cmdAnalogSet(char* cmd, int len) {
   if (len > 4) {
     int pin = (int)cmd[2];
-    if (pinTable[pin] != NULL) delete(pinTable[pin]); 
-    PWMPin* tmp= new PWMPin((Board::PWMPin)pin);
+    if (pinTable[pin] != NULL) delete(pinTable[pin]);
+    PWMPin* tmp = new PWMPin((Board::PWMPin)pin);
     pinTable[pin] = tmp;
-    
+
   }
 }
 
@@ -311,11 +313,11 @@ void cmdAnalogWrite(char* cmd, int len) {
   if (len > 5) {
     int pin = (int)cmd[2];
     uint8_t value = (uint8_t)cmd[3];
-    if(pinTable[pin] != NULL ){
-    PWMPin* tmp = (PWMPin*)pinTable[pin];
-    tmp->set(value);
+    if (pinTable[pin] != NULL ) {
+      PWMPin* tmp = (PWMPin*)pinTable[pin];
+      tmp->set(value);
     }
-    
+
   }
 }
 
@@ -346,10 +348,10 @@ void cmdAnalogReference(char* cmd, int len) {
   }
 }
 // command set master to button response
-// example : 55 39 01 0D 0A
+// example : 55 39 22 01 0D 0A
 void cmdSetMaster(char* cmd, int len) {
   if (len > 3) {
-    clientMaster = (int) cmd[2];
+    clientMaster = cmd[3];
   }
 }
 // command to define a button type pin
@@ -358,12 +360,12 @@ void cmdSetButton(char* cmd, int len) {
   if (len > 4) {
     int pin = (int)cmd[2];
     if (pinTable[pin] != NULL) delete(pinTable[pin]);
-    PushButton* tmp = new PushButton((Board::DigitalPin)pin,Button::ON_FALLING_MODE);
+    PushButton* tmp = new PushButton((Board::DigitalPin)pin, Button::ON_FALLING_MODE);
     pinTable[pin] = tmp;
     tmp->begin();
   }
 }
- 
+
 // command to read DHT11 sensor
 // example: 55 50 04 01 0D 0A
 void cmdReadDHT11(char* cmd, int len) {
