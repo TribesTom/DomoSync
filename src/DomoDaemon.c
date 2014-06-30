@@ -205,7 +205,7 @@ void *deviceOpener(void *arg)
     char buf[DOMO_ID_MAX_LENGTH + 1];
     memset (buf, 0, sizeof buf);
     if (devOpen==NULL) {
-      syslog (LOG_INFO, "Thread Device %d : Error : Started device opener NULL",thID);
+        syslog (LOG_INFO, "Thread Device %d : Error : Started device opener NULL",thID);
     }
 
     // wait for device ready ( device reboot on usb open )
@@ -227,7 +227,7 @@ void *deviceOpener(void *arg)
     // extract device name
     if (startsWith (buf, DOMO_ID_PREFIX)) {
 
-      syslog (LOG_INFO, "Thread Device %d : Looking device name : %s",thID,buf);
+        syslog (LOG_INFO, "Thread Device %d : Looking device name : %s",thID,buf);
         char *end = strstr (buf, DOMO_RESPONSE_END_STRING);
         if (end != NULL) {
             buf[end - buf] = 0;
@@ -243,11 +243,11 @@ void *deviceOpener(void *arg)
         memset (fdBuf, 0, sizeof fdBuf);
         sprintf (fdBuf,"%d", devOpen->fd);
 
-	struct termios attribs;
+        struct termios attribs;
         // loop to keep reading response for other commands
         while ( devOpen->fd >= 0 && tcgetattr(devOpen->fd,&attribs) == 0) {
             // read response from serial
-	    
+
             int k = 0;
             int hd = -1;
             int cid = -1;
@@ -287,12 +287,12 @@ void *deviceOpener(void *arg)
     syslog (LOG_INFO, "Thread Device %d : Terminated device opener for: %s (fd=%d)",thID,devOpen->devName, devOpen->fd);
     pthread_mutex_lock (&mutexDevice);
     if (devOpen->prev != NULL && devOpen->next != NULL ) {
-      devOpen->prev->next = devOpen->next;
-      devOpen->next->prev = devOpen->prev;
+        devOpen->prev->next = devOpen->next;
+        devOpen->next->prev = devOpen->prev;
     }
     else if (devOpen->prev == NULL && devOpen->next != NULL )  ListDevice = devOpen->next;
     else ListDevice = NULL;
-    if(devOpen->id != NULL ) free (devOpen->id);
+    if (devOpen->id != NULL ) free (devOpen->id);
     free (devOpen->devName);
     free (devOpen);
     pthread_mutex_unlock(&mutexDevice);
@@ -328,8 +328,8 @@ void openMultipleDevice()
                     char* devicePath=malloc(32*sizeof(char));
                     strcpy (devicePath, "/dev/");
                     strcat (devicePath, dir->d_name);
-					char* name= malloc(16*sizeof(char));
-					strcpy (name, dir->d_name);
+                    char* name= malloc(16*sizeof(char));
+                    strcpy (name, dir->d_name);
                     openOneDevice(devicePath, name);
                 }
             }
@@ -343,14 +343,14 @@ int openOneDevice(char* devicePath, char* d_name)
     int fd = serialOpen (devicePath, DOMO_DEVICE_BAUD_RATE);
     int thID=(int)syscall(SYS_gettid);
     if (fd > 0) {
-      syslog (LOG_INFO, "Thread Device %d : Opened serial device: %s (fd=%d)\n",thID,d_name, fd);
+        syslog (LOG_INFO, "Thread Device %d : Opened serial device: %s (fd=%d)\n",thID,d_name, fd);
         // Start a device opener
         DeviceOpen *devOpen;
         devOpen = malloc (sizeof(*devOpen));
         devOpen->fd = fd;
         devOpen->devName = malloc (strlen (d_name) + 1);
-	devOpen->prev = NULL;
-	devOpen->next = NULL;
+        devOpen->prev = NULL;
+        devOpen->next = NULL;
         strcpy (devOpen->devName, d_name);
         // Add to list
         pthread_mutex_lock(&mutexDevice);
@@ -359,8 +359,8 @@ int openOneDevice(char* devicePath, char* d_name)
             DeviceOpen *DevicePointer = ListDevice;
             while ( DevicePointer->next != NULL ) DevicePointer = DevicePointer->next;
             DevicePointer->next = devOpen;
-	    devOpen->prev=DevicePointer;
-	}
+            devOpen->prev=DevicePointer;
+        }
         pthread_mutex_unlock(&mutexDevice);
 
         // Launch Thread
@@ -375,21 +375,21 @@ int openOneDevice(char* devicePath, char* d_name)
         serialWriteString (fd, getIdCmd);
         syslog (LOG_INFO, "Thread Device %d : Send getID command for deive: %s command : %d,%d,%d,%d,%d\n",thID, d_name,getIdCmd[0],getIdCmd[1],getIdCmd[2],getIdCmd[3],getIdCmd[4]);
         serialFlush (fd);
-	if(devicePath != NULL ) free(devicePath);
-	if(d_name != NULL ) free(d_name);
-	return 1;
+        if (devicePath != NULL ) free(devicePath);
+        if (d_name != NULL ) free(d_name);
+        return 1;
     } else {
-      syslog (LOG_INFO, "Thread Device %d : Could not open serial deive: %s\n",thID, d_name);
-      	if(devicePath != NULL ) free(devicePath);
-        if(d_name != NULL )free(d_name);
-      
-		return -1;
+        syslog (LOG_INFO, "Thread Device %d : Could not open serial deive: %s\n",thID, d_name);
+        if (devicePath != NULL ) free(devicePath);
+        if (d_name != NULL )free(d_name);
+
+        return -1;
     }
 }
 int searchTarget( char *part )
 {
     pthread_mutex_lock(&mutexDevice);
-    
+
     if ( ListDevice != NULL )
     {
         DeviceOpen *devPointeur = ListDevice;
@@ -418,15 +418,15 @@ static void ASSERT_TRUE(int x)
 }
 void *deviceMonitoring(void* arg)
 {
-  int thID=(int)syscall(SYS_gettid);
-  struct udev_monitor *mon;
+    int thID=(int)syscall(SYS_gettid);
+    struct udev_monitor *mon;
     struct udev *udev;
     struct udev_device *dev;
     int fd;
     udev = udev_new();
     if (!udev) {
-      syslog(LOG_INFO,"Thread UDEV %d : Can't create udev\n",thID);
-	exit(1);
+        syslog(LOG_INFO,"Thread UDEV %d : Can't create udev\n",thID);
+        exit(1);
     }
     syslog (LOG_INFO,"Thread UDEV %d : Udev Monitoring device",thID);
     mon = udev_monitor_new_from_netlink(udev, "udev");
@@ -464,19 +464,19 @@ void *deviceMonitoring(void* arg)
                select() ensured that this will not block. */
             dev = udev_monitor_receive_device(mon);
             if (dev) {
-	      const char* szAction = udev_device_get_action(dev);
-	      if (strcmp("add",szAction) ==0 ){  
-		char* devicePath=malloc(32*sizeof(char));;
-		strcpy(devicePath,udev_device_get_devnode(dev));
-		char* d_name=malloc(16*sizeof(char));;
-		strcpy(d_name,udev_device_get_sysname(dev));
-                syslog (LOG_INFO,"Thread UDEV %d : Udev path : %s name : %s\n",thID, devicePath,d_name);
-		sleep(2);
-		openOneDevice(devicePath,d_name);
-		}
+                const char* szAction = udev_device_get_action(dev);
+                if (strcmp("add",szAction) ==0 ) {
+                    char* devicePath=malloc(32*sizeof(char));;
+                    strcpy(devicePath,udev_device_get_devnode(dev));
+                    char* d_name=malloc(16*sizeof(char));;
+                    strcpy(d_name,udev_device_get_sysname(dev));
+                    syslog (LOG_INFO,"Thread UDEV %d : Udev path : %s name : %s\n",thID, devicePath,d_name);
+                    sleep(2);
+                    openOneDevice(devicePath,d_name);
+                }
             }
             else {
-	      syslog (LOG_INFO,"Udev :Thread UDEV %d: Device from receive_device(). An error occured.\n",thID);
+                syslog (LOG_INFO,"Udev :Thread UDEV %d: Device from receive_device(). An error occured.\n",thID);
             }
         }
         usleep(250*1000);
@@ -490,84 +490,110 @@ void *deviceMonitoring(void* arg)
 void *deviceEthernetMonitoring(void* arg)
 {
     int thID=(int)syscall(SYS_gettid);
-	int socket_desc , new_socket , c , *new_sock;
+    int socket_desc , new_socket , c , *new_sock;
     struct sockaddr_in server , client;
     char *message;
-     
+
     //Create socket
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
     if (socket_desc == -1)
     {
         syslog(LOG_INFO,"Thread % : Could not create socket",thID);
     }
-     
+
     //Prepare the sockaddr_in structure
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons( 8888 );
-     
+
     //Bind
-    if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
+    if ( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
     {
         syslog(LOG_INFO,"Thread % : bind failed",thID);
         return 1;
     }
-     
+
     //Listen
     listen(socket_desc , 3);
-     
+
     //Accept and incoming connection
     syslog(LOG_INFO,"Thread % : Waiting for incoming connections...",thID);
     c = sizeof(struct sockaddr_in);
-    while( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
+    while ( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
     {
         syslog(LOG_INFO,"Thread % : Connection accepted");
-         
+
         //Reply to the client
-         
+
         pthread_t sniffer_thread;
         new_sock = malloc(1);
         *new_sock = new_socket;
-         
-        if( pthread_create( &sniffer_thread , NULL ,  connection_handler , (void*) new_sock) < 0)
+
+        if ( pthread_create( &sniffer_thread , NULL ,  connection_handler , (void*) new_sock) < 0)
         {
             syslog(LOG_INFO,"Thread % : could not create thread",thID);
             return 1;
         }
-         
-        
-        
+
+
+
     }
-     
+
     if (new_socket<0)
     {
-        perror("accept failed");
+        syslog(LOG_INFO,"Thread % : accept failed",thID);
         return 1;
     }
-     
+
     return 0;
 }
- 
+
 /*
  * This will handle connection for each client
  * */
 void *connection_handler(void *socket_desc)
 {
+    int thID=(int)syscall(SYS_gettid);
     //Get the socket descriptor
     int sock = *(int*)socket_desc;
-     
-    char *message;
-     
+    char d_name[30];
+
+    sprintf (d_name,"%s%d", ETHERNET_PREFIX, thiID);
+    DeviceOpen *devOpen;
+    devOpen = malloc (sizeof(*devOpen));
+    devOpen->fd = sock;
+    devOpen->devName = malloc (strlen (d_name) + 1);
+    devOpen->prev = NULL;
+    devOpen->next = NULL;
+    strcpy (devOpen->devName, d_name);
+    // Add to list
+    pthread_mutex_lock(&mutexDevice);
+    if ( ListDevice == NULL ) ListDevice = devOpen;
+    else {
+        DeviceOpen *DevicePointer = ListDevice;
+        while ( DevicePointer->next != NULL ) DevicePointer = DevicePointer->next;
+        DevicePointer->next = devOpen;
+        devOpen->prev=DevicePointer;
+    }
+
+
+    char getIdCmd[] = { COMMAND_START_CHAR, CMD_GET_DEVICE_ID, COMMAND_END_CHAR1, COMMAND_END_CHAR2, 0x00 };
+
+    // Wait for device reboot on serial open
+    sleep(1);
+    serialWriteString (fd, getIdCmd);
+    syslog (LOG_INFO, "Thread Device %d : Send getID command for deive: %s command : %d,%d,%d,%d,%d\n",thID, d_name,getIdCmd[0],getIdCmd[1],getIdCmd[2],getIdCmd[3],getIdCmd[4]);
+    serialFlush (fd);
     //Send some messages to the client
     message = "Greetings! I am your connection handler\n";
     write(sock , message , strlen(message));
-     
+
     message = "Its my duty to communicate with you";
     write(sock , message , strlen(message));
-     
+
     //Free the socket pointer
     free(socket_desc);
-     
+
     return 0;
 }
 
@@ -597,15 +623,15 @@ int main(int argc, char **argv)
     //Monitor connecting device
     pthread_t doThread;
     pthread_create (&doThread, NULL, deviceMonitoring, NULL);
-	
-	// Monitoring Ethernet Device
-	
-	pthread_t doThread;
+
+    // Monitoring Ethernet Device
+
+    pthread_t doThread;
     pthread_create (&doThread, NULL, deviceEthernetMonitor, NULL);
     // Connect to devices
     openMultipleDevice();
     /* main loop */
-    
+
     char buffer[MAX_MSG_SIZE + 1];
     int must_stop = 0;
     while (!must_stop) {
@@ -650,7 +676,7 @@ int main(int argc, char **argv)
                 case MSG_CLOSE_DEVICE:
                     clientStatus[clientId] = 0;
                     CliList[clientId].id=0;
-					mq_close(CliList[clientId].mq);
+                    mq_close(CliList[clientId].mq);
                     break;
                 case MSG_SET_PIN_OUTPUT:
                     sendCommand(CMD_SET_PIN_OUTPUT, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
@@ -678,13 +704,13 @@ int main(int argc, char **argv)
                 case MSG_ANALOG_REFERENCE:
                     sendCommand(CMD_ANALOG_REFERENCE, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
                     break;
-		case MSG_SET_MASTER:
-		    sendCommand(CMD_SET_MASTER, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
+                case MSG_SET_MASTER:
+                    sendCommand(CMD_SET_MASTER, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
                     break;
-		case MSG_SET_BUTTON:
-		    sendCommand(CMD_SET_BUTTON, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
+                case MSG_SET_BUTTON:
+                    sendCommand(CMD_SET_BUTTON, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
                     break;
-				case MSG_SET_PIN_PWM:
+                case MSG_SET_PIN_PWM:
                     sendCommand(CMD_SET_ANALOG, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
                     break;
                 case MSG_READ_DHT11:
@@ -708,3 +734,4 @@ int main(int argc, char **argv)
 
     return 0;
 }
+

@@ -40,6 +40,8 @@
 #define MAX_MSG_PARTS		8
 #define MAX_MSG_SIZE    	2048
 #define MSG_PART_SEPARATOR	"]=["
+#define ETHERNET_PREFIX			"ETHERNET-"
+
 
 #define COMMAND_START_CHAR		'U'
 #define COMMAND_END_CHAR1		'\r'
