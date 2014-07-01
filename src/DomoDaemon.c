@@ -659,10 +659,6 @@ void *connection_handler(void *socket_desc)
                     buf[end - buf] = 0;
                 }
                 syslog (LOG_INFO, "Thread Device %d : Received response from %s(fd=%d): %s Client : %d ",thID,devOpen->devName, devOpen->fd, buf,cid);
-
-
-
-
                 // send back the response to client
                 mq_send (CliList[cid].mq, buf, strlen (buf), 0);
             }
