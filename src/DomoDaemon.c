@@ -282,8 +282,9 @@ void *deviceOpener(void *arg)
         }
 
         // cleanup
-        serialClose (devOpen->fd);
+        
     }
+	serialClose (devOpen->fd);
     syslog (LOG_INFO, "Thread Device %d : Terminated device opener for: %s (fd=%d)",thID,devOpen->devName, devOpen->fd);
     pthread_mutex_lock (&mutexDevice);
     if (devOpen->prev != NULL && devOpen->next != NULL ) {
@@ -557,8 +558,10 @@ void *connection_handler(void *socket_desc)
     //Get the socket descriptor
     int sock = *(int*)socket_desc;
     char d_name[30];
-
-    sprintf (d_name,"%s%d", ETHERNET_PREFIX, thiID);
+	
+	
+	// generate devopen device
+	sprintf (d_name,"%s%d", ETHERNET_PREFIX, thiID);
     DeviceOpen *devOpen;
     devOpen = malloc (sizeof(*devOpen));
     devOpen->fd = sock;
@@ -566,7 +569,8 @@ void *connection_handler(void *socket_desc)
     devOpen->prev = NULL;
     devOpen->next = NULL;
     strcpy (devOpen->devName, d_name);
-    // Add to list
+    
+	// Add to list
     pthread_mutex_lock(&mutexDevice);
     if ( ListDevice == NULL ) ListDevice = devOpen;
     else {
@@ -575,26 +579,116 @@ void *connection_handler(void *socket_desc)
         DevicePointer->next = devOpen;
         devOpen->prev=DevicePointer;
     }
+	pthread_mutex_unlock(&mutexDevice);
 
-
+	// Get device ID
     char getIdCmd[] = { COMMAND_START_CHAR, CMD_GET_DEVICE_ID, COMMAND_END_CHAR1, COMMAND_END_CHAR2, 0x00 };
-
-    // Wait for device reboot on serial open
-    sleep(1);
-    serialWriteString (fd, getIdCmd);
+    serialWriteString (devopen->fd, getIdCmd);
     syslog (LOG_INFO, "Thread Device %d : Send getID command for deive: %s command : %d,%d,%d,%d,%d\n",thID, d_name,getIdCmd[0],getIdCmd[1],getIdCmd[2],getIdCmd[3],getIdCmd[4]);
-    serialFlush (fd);
-    //Send some messages to the client
-    message = "Greetings! I am your connection handler\n";
-    write(sock , message , strlen(message));
+    
+	int i = 0;
+    int j = 0;
+    int head = -1;
+    int chr;
+    char buf[DOMO_ID_MAX_LENGTH + 1];
+    memset (buf, 0, sizeof buf);
+    if (devOpen==NULL) {
+        syslog (LOG_INFO, "Thread Device %d : Error : Started device opener NULL",thID);
+    }
 
-    message = "Its my duty to communicate with you";
-    write(sock , message , strlen(message));
+       
+    // read response from device
+    while ((chr = serialReadChar (devOpen->fd)) > 0) {
+        if (head == -1 && chr == DOMO_RESPONSE_START_CHAR) {
+            head = chr;
+        } else if (head == DOMO_RESPONSE_START_CHAR) {
 
+            buf[j ++] = (chr & 0xFF);
+            if (endsWith (buf, DOMO_RESPONSE_END_STRING)) {
+                break;
+            }
+
+        }
+    }
+    syslog (LOG_INFO, "Thread Device %d : Looping device opener for : %s buffer: %s taille buf : %d ",thID,devOpen->devName, buf,j);
+    // extract device name
+    if (startsWith (buf, DOMO_ID_PREFIX)) {
+
+        syslog (LOG_INFO, "Thread Device %d : Looking device name : %s",thID,buf);
+        char *end = strstr (buf, DOMO_RESPONSE_END_STRING);
+        if (end != NULL) {
+            buf[end - buf] = 0;
+        }
+        syslog (LOG_INFO, "Thread Device %d : Receive device id: %s",thID, buf);
+        devOpen->id = malloc (strlen(buf) + 1);
+        strcpy (devOpen->id, buf);
+
+        syslog (LOG_INFO, "Thread Device %d : Device found, send fd=%d",thID,devOpen->fd);
+
+        // device found, send back the fd
+        char fdBuf[16];
+        memset (fdBuf, 0, sizeof fdBuf);
+        sprintf (fdBuf,"%d", devOpen->fd);
+
+        struct termios attribs;
+        // loop to keep reading response for other commands
+        while ( devOpen->fd >= 0 && tcgetattr(devOpen->fd,&attribs) == 0) {
+            // read response from serial
+
+            int k = 0;
+            int hd = -1;
+            int cid = -1;
+            memset (buf, 0, sizeof buf);
+            while ((chr = serialReadChar (devOpen->fd)) > 0) {
+                if (hd == -1 && chr == DOMO_RESPONSE_START_CHAR) {
+                    hd = chr;
+                } else if (hd == DOMO_RESPONSE_START_CHAR) {
+                    if (cid == -1) {
+                        cid = chr;
+                    } else {
+                        buf[k ++] = (chr & 0xFF);
+                        if (endsWith (buf, DOMO_RESPONSE_END_STRING)) {
+                            break;
+                        }
+                    }
+                }
+            }
+            if (k > 0) {
+                char *end = strstr (buf, DOMO_RESPONSE_END_STRING);
+                if (end != NULL) {
+                    buf[end - buf] = 0;
+                }
+                syslog (LOG_INFO, "Thread Device %d : Received response from %s(fd=%d): %s Client : %d ",thID,devOpen->devName, devOpen->fd, buf,cid);
+
+
+
+
+                // send back the response to client
+                mq_send (CliList[cid].mq, buf, strlen (buf), 0);
+            }
+        }        
+    }
+	serialClose (devOpen->fd);
+    syslog (LOG_INFO, "Thread Device %d : Terminated device opener for: %s (fd=%d)",thID,devOpen->devName, devOpen->fd);
+    pthread_mutex_lock (&mutexDevice);
+    if (devOpen->prev != NULL && devOpen->next != NULL ) {
+        devOpen->prev->next = devOpen->next;
+        devOpen->next->prev = devOpen->prev;
+    }
+    else if (devOpen->prev == NULL && devOpen->next != NULL )  ListDevice = devOpen->next;
+    else ListDevice = NULL;
+	pthread_mutex_unlock(&mutexDevice);
+    if (devOpen->id != NULL ) free (devOpen->id);
+    free (devOpen->devName);
+    free (devOpen);
+    
+    syslog (LOG_INFO, "Thread Device %d : Terminated FREE device",thID);
+    
+    
     //Free the socket pointer
     free(socket_desc);
 
-    return 0;
+    return NULL;
 }
 
 
