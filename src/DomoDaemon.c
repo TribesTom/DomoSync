@@ -43,7 +43,8 @@
 #include <libudev.h>
 #include <termios.h>
 #include <sys/syscall.h>
-
+#include <sys/socket.h>
+#include <arpa/inet.h> //inet_addr
 
 #include "DomoDaemon.h"
 #include "serial.h"
@@ -488,66 +489,7 @@ void *deviceMonitoring(void* arg)
 }
 
 
-void *deviceEthernetMonitoring(void* arg)
-{
-    int thID=(int)syscall(SYS_gettid);
-    int socket_desc , new_socket , c , *new_sock;
-    struct sockaddr_in server , client;
-    char *message;
 
-    //Create socket
-    socket_desc = socket(AF_INET , SOCK_STREAM , 0);
-    if (socket_desc == -1)
-    {
-        syslog(LOG_INFO,"Thread % : Could not create socket",thID);
-    }
-
-    //Prepare the sockaddr_in structure
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons( 8888 );
-
-    //Bind
-    if ( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
-    {
-        syslog(LOG_INFO,"Thread % : bind failed",thID);
-        return 1;
-    }
-
-    //Listen
-    listen(socket_desc , 3);
-
-    //Accept and incoming connection
-    syslog(LOG_INFO,"Thread % : Waiting for incoming connections...",thID);
-    c = sizeof(struct sockaddr_in);
-    while ( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
-    {
-        syslog(LOG_INFO,"Thread % : Connection accepted");
-
-        //Reply to the client
-
-        pthread_t sniffer_thread;
-        new_sock = malloc(1);
-        *new_sock = new_socket;
-
-        if ( pthread_create( &sniffer_thread , NULL ,  connection_handler , (void*) new_sock) < 0)
-        {
-            syslog(LOG_INFO,"Thread % : could not create thread",thID);
-            return 1;
-        }
-
-
-
-    }
-
-    if (new_socket<0)
-    {
-        syslog(LOG_INFO,"Thread % : accept failed",thID);
-        return 1;
-    }
-
-    return 0;
-}
 
 /*
  * This will handle connection for each client
@@ -561,7 +503,7 @@ void *connection_handler(void *socket_desc)
 	
 	
 	// generate devopen device
-	sprintf (d_name,"%s%d", ETHERNET_PREFIX, thiID);
+    sprintf (d_name,"%s%d", ETHERNET_PREFIX, thID);
     DeviceOpen *devOpen;
     devOpen = malloc (sizeof(*devOpen));
     devOpen->fd = sock;
@@ -583,7 +525,7 @@ void *connection_handler(void *socket_desc)
 
 	// Get device ID
     char getIdCmd[] = { COMMAND_START_CHAR, CMD_GET_DEVICE_ID, COMMAND_END_CHAR1, COMMAND_END_CHAR2, 0x00 };
-    serialWriteString (devopen->fd, getIdCmd);
+    serialWriteString (devOpen->fd, getIdCmd);
     syslog (LOG_INFO, "Thread Device %d : Send getID command for deive: %s command : %d,%d,%d,%d,%d\n",thID, d_name,getIdCmd[0],getIdCmd[1],getIdCmd[2],getIdCmd[3],getIdCmd[4]);
     
 	int i = 0;
@@ -688,6 +630,67 @@ void *connection_handler(void *socket_desc)
 }
 
 
+void *deviceEthernetMonitoring(void* arg)
+{
+    int thID=(int)syscall(SYS_gettid);
+    int socket_desc , new_socket , c , *new_sock;
+    struct sockaddr_in server , client;
+    char *message;
+
+    //Create socket
+    socket_desc = socket(AF_INET , SOCK_STREAM , 0);
+    if (socket_desc == -1)
+    {
+        syslog(LOG_INFO,"Thread %d : Could not create socket",thID);
+    }
+
+    //Prepare the sockaddr_in structure
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons( 8888 );
+
+    //Bind
+    if ( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
+    {
+        syslog(LOG_INFO,"Thread %d : bind failed",thID);
+        return;
+    }
+
+    //Listen
+    listen(socket_desc , 3);
+
+    //Accept and incoming connection
+    syslog(LOG_INFO,"Thread %d : Waiting for incoming connections...",thID);
+    c = sizeof(struct sockaddr_in);
+    while ( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
+    {
+      syslog(LOG_INFO,"Thread %d : Connection accepted",thID);
+
+        //Reply to the client
+
+        pthread_t sniffer_thread;
+        new_sock = malloc(1);
+        *new_sock = new_socket;
+
+        if ( pthread_create( &sniffer_thread , NULL ,  connection_handler , (void*) new_sock) < 0)
+        {
+            syslog(LOG_INFO,"Thread %d : could not create thread",thID);
+            return ;
+        }
+
+
+
+    }
+
+    if (new_socket<0)
+    {
+        syslog(LOG_INFO,"Thread %d : accept failed",thID);
+        return NULL;
+    }
+
+    return ;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -716,8 +719,8 @@ int main(int argc, char **argv)
 
     // Monitoring Ethernet Device
 
-    pthread_t doThread;
-    pthread_create (&doThread, NULL, deviceEthernetMonitor, NULL);
+    pthread_t doThread2;
+    pthread_create (&doThread2, NULL, deviceEthernetMonitoring, NULL);
     // Connect to devices
     openMultipleDevice();
     /* main loop */
