@@ -572,9 +572,9 @@ void *connection_handler(void *socket_desc)
         memset (fdBuf, 0, sizeof fdBuf);
         sprintf (fdBuf,"%d", devOpen->fd);
 
-        struct termios attribs;
+       
         // loop to keep reading response for other commands
-        while ( devOpen->fd >= 0 && tcgetattr(devOpen->fd,&attribs) == 0) {
+        while ( devOpen->fd >= 0 ) {
             // read response from serial
 
             int k = 0;
