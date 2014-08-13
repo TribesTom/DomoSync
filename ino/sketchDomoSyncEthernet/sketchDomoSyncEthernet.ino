@@ -13,6 +13,7 @@
 #include "Cosa/InputPin.hh"
 #include "Cosa/Event.hh"
 #include "Cosa/PWMPin.hh"
+#include "Cosa/Socket/Driver/W5100.hh"
 #include <stdlib.h> // for malloc and free
 
 #define BAUD_RATE 115200
@@ -50,7 +51,7 @@ static const uint8_t mac[6] __PROGMEM = { MAC };
 // W5100 Ethernet Controller 
 W5100 ethernet(mac);
 Socket* sock = NULL;
-
+Trace com;
 
 // client master for button interuption
 char clientMaster = -1;
@@ -83,7 +84,7 @@ class PushButton : public Button {
       UNUSED(type);
       m_count += 1;
       int pin = get_pin();
-      trace << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING);
+      com << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING);
     }
 };
 
@@ -125,11 +126,16 @@ void loop() {
 
   // listen to incoming commands
   int len;
-  if (( len = sock.peekchar('\n')) >= 0) {
+  if(sock->isconnected()<=0) { 
+    sock->disconnect();
+    sock=openConnection();
+    return;
+  }
+  if (( len = sock->peekchar('\n')) >= 0) {
     int pos = 0;
     char z;
     // drop useless data
-    while ( (z = sock.getchar()) != COMMAND_START_CHAR && pos < len)
+    while ( (z = sock->getchar()) != COMMAND_START_CHAR && pos < len)
     {
       pos++;
     }
@@ -140,7 +146,7 @@ void loop() {
         int taille = 1;
         char cmd[10];
         cmd[0] = z;
-        while ((z = sock.getchar()) != '\n')
+        while ((z = sock->getchar()) != '\n')
 
         {
           cmd[taille] = z;
@@ -157,11 +163,17 @@ void loop() {
 Socket* openConnection()
 {
    
-  Socket sock_tmp=NULL
-  ASSERT((sock_tmp = ethernet.socket(Socket::TCP)) != NULL);
+  Socket* sock_tmp=NULL;
+  sock_tmp = ethernet.socket(Socket::TCP);
+  if (sock_tmp==NULL) return NULL; 
   uint8_t ipremote[4] = { IPREMOTE };
-  if(sock.connect(ipremote,PORT)>=0 return sock;
+  if(sock->connect(ipremote,PORT)>=0) 
+  {
+    com.begin(sock_tmp);
+    return sock;
+  }
   else return NULL;
+  
   
 }
 
@@ -263,9 +275,10 @@ void processCommand(char *cmd, int len) {
 void cmdGetID(char* cmd, int len) {
   if (len > 3) {
     uart.flush();
-    sock << RESPONSE_START_CHAR ;
-    for (int u = 0; u < EEPROM_SIZE - 1; u++) sock << id[u];
-    sock << PSTR(RESPONSE_END_STRING);
+    com << RESPONSE_START_CHAR ;
+    for (int u = 0; u < EEPROM_SIZE - 1; u++) com << id[u];
+    //sock->write(id,EEPROM_SIZE);
+    com << PSTR(RESPONSE_END_STRING);
   }
 }
 
@@ -323,7 +336,7 @@ void cmdGetPinStatus(char* cmd, int len) {
     char clientId = cmd[3];
     if (pinTable[pin] != NULL ) {
       InputPin* tmp = (InputPin*)pinTable[pin];
-      sock << RESPONSE_START_CHAR << clientId << tmp->read() << PSTR(RESPONSE_END_STRING);
+      com << RESPONSE_START_CHAR << clientId << tmp->read() << PSTR(RESPONSE_END_STRING);
     }
   }
 }
@@ -362,7 +375,7 @@ void cmdAnalogRead(char* cmd, int len) {
     int pin = (int)cmd[2];
     char clientId = cmd[3];
     uint16_t value = AnalogPin::sample((Board::AnalogPin)pin, Board::AVCC_REFERENCE);
-    sock << RESPONSE_START_CHAR << clientId << value  << PSTR(RESPONSE_END_STRING);
+    com << RESPONSE_START_CHAR << clientId << value  << PSTR(RESPONSE_END_STRING);
   }
 }
 
