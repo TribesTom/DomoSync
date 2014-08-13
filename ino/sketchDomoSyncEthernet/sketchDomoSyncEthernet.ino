@@ -126,6 +126,11 @@ void loop() {
 
   // listen to incoming commands
   int len;
+  if(sock == NULL )
+  { 
+    openConnection(); 
+    return ; 
+  }
   if(sock->isconnected()<=0) { 
     com.end();
     sock->disconnect();
