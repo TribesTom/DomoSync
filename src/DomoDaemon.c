@@ -196,6 +196,7 @@ void responseToClient(int clientId, char *resp)
 
 void *deviceOpener(void *arg)
 {
+    pthread_detach(pthread_self());
     int thID=(int)syscall(SYS_gettid);
     DeviceOpen *devOpen = (DeviceOpen *)arg;
     syslog (LOG_INFO, "Thread Device %d : Started device opener for: %s fd : %d ",thID, devOpen->devName,devOpen->fd );
@@ -414,6 +415,7 @@ static void ASSERT_TRUE(int x)
 }
 void *deviceMonitoring(void* arg)
 {
+    pthread_detach(pthread_self());
     int thID=(int)syscall(SYS_gettid);
     struct udev_monitor *mon;
     struct udev *udev;
@@ -493,6 +495,7 @@ void *deviceMonitoring(void* arg)
  * */
 void *connection_handler(void *socket_desc)
 {
+    pthread_detach(pthread_self());
     int thID=(int)syscall(SYS_gettid);
     //Get the socket descriptor
     int sock = *(int*)socket_desc;
@@ -627,6 +630,7 @@ void *connection_handler(void *socket_desc)
 
 void *deviceEthernetMonitoring(void* arg)
 {
+    pthread_detach(pthread_self());
     int thID=(int)syscall(SYS_gettid);
     int socket_desc , new_socket , c , *new_sock;
     struct sockaddr_in server , client;
