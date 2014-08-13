@@ -204,7 +204,7 @@ void *deviceOpener(void *arg)
     int head = -1;
     int chr;
     char buf[DOMO_ID_MAX_LENGTH + 1];
-    memset (buf, 0, sizeof buf);
+    memset (buf, 0, sizeof(buf));
     if (devOpen==NULL) {
         syslog (LOG_INFO, "Thread Device %d : Error : Started device opener NULL",thID);
     }
@@ -226,7 +226,7 @@ void *deviceOpener(void *arg)
     }
     syslog (LOG_INFO, "Thread Device %d : Looping device opener for : %s buffer: %s taille buf : %d ",thID,devOpen->devName, buf,j);
     // extract device name
-    if (startsWith (buf, DOMO_ID_PREFIX)) {
+    if (j>0 && startsWith (buf, DOMO_ID_PREFIX)) {
 
         syslog (LOG_INFO, "Thread Device %d : Looking device name : %s",thID,buf);
         char *end = strstr (buf, DOMO_RESPONSE_END_STRING);
@@ -285,7 +285,7 @@ void *deviceOpener(void *arg)
         // cleanup
         
     }
-	serialClose (devOpen->fd);
+    serialClose (devOpen->fd);
     syslog (LOG_INFO, "Thread Device %d : Terminated device opener for: %s (fd=%d)",thID,devOpen->devName, devOpen->fd);
     pthread_mutex_lock (&mutexDevice);
     if (devOpen->prev != NULL && devOpen->next != NULL ) {
@@ -294,9 +294,8 @@ void *deviceOpener(void *arg)
     }
     else if (devOpen->prev == NULL && devOpen->next != NULL )  ListDevice = devOpen->next;
     else ListDevice = NULL;
-    if (devOpen->id != NULL ) free (devOpen->id);
-    free (devOpen->devName);
-    free (devOpen);
+    if (devOpen->devName != NULL ) free (devOpen->devName);
+    if (devOpen != NULL) free (devOpen);
     pthread_mutex_unlock(&mutexDevice);
     syslog (LOG_INFO, "Thread Device %d : Terminated FREE device",thID);
     return NULL;
@@ -375,16 +374,11 @@ int openOneDevice(char* devicePath, char* d_name)
         // Wait for device reboot on serial open
         sleep(1);
         serialWriteString (fd, getIdCmd);
-        syslog (LOG_INFO, "Thread Device %d : Send getID command for deive: %s command : %d,%d,%d,%d,%d\n",thID, d_name,getIdCmd[0],getIdCmd[1],getIdCmd[2],getIdCmd[3],getIdCmd[4]);
+        syslog (LOG_INFO, "Thread Device %d : Send getID command for deive: %s command : %d,%d,%d,%d,%d\n",thID, devOpen->devName,getIdCmd[0],getIdCmd[1],getIdCmd[2],getIdCmd[3],getIdCmd[4]);
         serialFlush (fd);
-        if (devicePath != NULL ) free(devicePath);
-        if (d_name != NULL ) free(d_name);
         return 1;
     } else {
         syslog (LOG_INFO, "Thread Device %d : Could not open serial deive: %s\n",thID, d_name);
-        if (devicePath != NULL ) free(devicePath);
-        if (d_name != NULL )free(d_name);
-
         return -1;
     }
 }
@@ -465,6 +459,7 @@ void *deviceMonitoring(void* arg)
             /* Make the call to receive the device.
                select() ensured that this will not block. */
             dev = udev_monitor_receive_device(mon);
+	    usleep(250*1000);
             if (dev) {
                 const char* szAction = udev_device_get_action(dev);
                 if (strcmp("add",szAction) ==0 ) {
@@ -475,6 +470,8 @@ void *deviceMonitoring(void* arg)
                     syslog (LOG_INFO,"Thread UDEV %d : Udev path : %s name : %s\n",thID, devicePath,d_name);
                     sleep(2);
                     openOneDevice(devicePath,d_name);
+		    free(devicePath);
+		    free(d_name);
                 }
             }
             else {
@@ -615,8 +612,7 @@ void *connection_handler(void *socket_desc)
     }
     else if (devOpen->prev == NULL && devOpen->next != NULL )  ListDevice = devOpen->next;
     else ListDevice = NULL;
-	pthread_mutex_unlock(&mutexDevice);
-    if (devOpen->id != NULL ) free (devOpen->id);
+    pthread_mutex_unlock(&mutexDevice);
     free (devOpen->devName);
     free (devOpen);
     
@@ -628,7 +624,6 @@ void *connection_handler(void *socket_desc)
 
     return NULL;
 }
-
 
 void *deviceEthernetMonitoring(void* arg)
 {
