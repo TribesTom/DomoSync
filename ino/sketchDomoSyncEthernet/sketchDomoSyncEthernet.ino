@@ -39,19 +39,21 @@ char idGen[EEPROM_SIZE] EEMEM;
 #define USE_ETHERNET_SHIELD
 #if defined(USE_ETHERNET_SHIELD)
 OutputPin sd(Board::D4, 1);
+//OutputPin ssp(Board::D53,1);
+//OutputPin ssp2(Board::D10,1);
 #endif
 // Network configuration
 #define MAC 0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed
 #define IP 192,168,1,110
 #define SUBNET 255,255,255,0
-#define IPREMOTE 192,168,1,100
+#define IPREMOTE 192,168,1,2
 #define PORT 8888
 static const uint8_t mac[6] __PROGMEM = { MAC };
 
-// W5100 Ethernet Controller 
+// W5100 Ethernet Controller
 W5100 ethernet(mac);
 Socket* sock = NULL;
-Trace com;
+IOStream com;
 
 // client master for button interuption
 char clientMaster = -1;
@@ -98,26 +100,29 @@ void setup() {
   lastMicros = RTC::micros();
   uart.begin(BAUD_RATE);
   trace.begin(&uart); //, PSTR("Cosa UART: started"));
-
+  trace << PSTR("Get ID") << endl;
   // Id initialisation
   getID(id);
   if (id[0] != 'D') {
     generateID();
     getID(id);
   }
-  
+  sleep(1);
   // Initialise Ethernet shield
-  
+  trace << PSTR("Try Socket") << endl;
   uint8_t ip[4] = { IP };
   uint8_t subnet[4] = { SUBNET };
-  ASSERT(ethernet.begin(ip, subnet));
+  bool result = ethernet.begin(ip, subnet) ;
+  if ( result == false) trace << PSTR("Ethernet begin failed") << endl;
+  sleep(1);
   sock = openConnection();
+
 }
 
 void loop() {
 
   Event event;
-  if(Event::queue.available()>0 ) Event::queue.await(&event); //Event::queue.await(&event);
+  if (Event::queue.available() > 0 ) Event::queue.await(&event); //Event::queue.await(&event);
   event.dispatch();
   // calculate the elapsed time since last circle
   unsigned long currentMicros = RTC::micros();
@@ -125,20 +130,53 @@ void loop() {
   lastMicros = currentMicros;
 
   // listen to incoming commands
-  int len;
-  if(sock == NULL )
-  { 
-    openConnection(); 
-    return ; 
+
+  if (sock == NULL )
+  {
+    openConnection();
+    return ;
   }
-  if(sock->isconnected()<=0) { 
-    com.end();
+  if (sock->isconnected() <= 0) {
     sock->disconnect();
     sock->close();
-    sock=openConnection();
+    sock = openConnection();
     return;
   }
-  if (( len = sock->peekchar('\n')) >= 0) {
+  //trace << PSTR("Wait command") << endl;
+  int pos = 0;
+  char z='z';
+  char cmd[10];
+  int len =0;
+  //trace << PSTR("Info sock : ") << sock << endl;
+  if ( (len = sock->available()) > 0 ) {
+  trace << PSTR("Bytes Available :") <<len << endl;
+    while ( z != COMMAND_START_CHAR && pos < len )
+    {
+      sock->read(&z,sizeof(char));
+      pos++;
+    }
+    trace << PSTR("Process Command : ") ;
+    int taille = 0;
+    if (pos < len ) {
+     
+      
+      while ( z != '\n' &&  taille < MAX_MSG_SIZE)
+      {
+        
+        trace << taille << PSTR(":")<< (int)z;
+        cmd[taille] = z;
+        sock->read(&z,sizeof(char));
+        taille++;
+      }
+    }
+
+    trace << PSTR("end") << endl;
+    if ( pos < MAX_MSG_SIZE ) processCommand(cmd, taille + 1);
+  }
+
+
+
+  /*if (( len = sock->peekchar('\n')) >= 0) {
     int pos = 0;
     char z;
     // drop useless data
@@ -159,29 +197,45 @@ void loop() {
           cmd[taille] = z;
           taille++;
         }
+        trace << PSTR("Process Command : ") << cmd << endl;
         processCommand(cmd, taille + 1);
 
 
       }
     }
-  }
+  }*/
 }
 
 Socket* openConnection()
 {
-   
-  Socket* sock_tmp=NULL;
+  trace << PSTR("Open Connection") << endl;
+  Socket* sock_tmp = NULL;
   sock_tmp = ethernet.socket(Socket::TCP);
-  if (sock_tmp==NULL) return NULL; 
-  uint8_t ipremote[4] = { IPREMOTE };
-  if(sock->connect(ipremote,PORT)>=0) 
-  {
-    com.begin(sock_tmp);
-    return sock;
+  trace << PSTR("Opened Connection") << endl;
+  sleep(1);
+  if (sock_tmp == NULL) {
+    trace << PSTR("Socket NULL") << endl;
+    return NULL;
   }
-  else return NULL;
-  
-  
+  uint8_t ipremote1[4] = { IPREMOTE };
+  uint16_t port1 = PORT;
+  trace << PSTR("Try connect") << ipremote1[0] << ipremote1[1] << ipremote1[2] << ipremote1[3] << PSTR(":") << PORT << endl;
+  sleep(1);
+  int res = sock_tmp->connect(ipremote1, port1);
+  trace << PSTR("Socket trying done ") << endl ;
+  sleep(1);
+  if ( res >= 0)
+  {
+    trace << PSTR("Socket Opened ") << endl ;
+    com.set_device(sock_tmp);
+    trace << PSTR("Com begin on sock : ") << sock_tmp << endl ;
+    return sock_tmp;
+  }
+  else {
+    trace << PSTR("Failed Socket");
+    return NULL;
+  }
+
 }
 
 char* getID(char *id) {
@@ -227,8 +281,9 @@ void generateID() {
 
 void processCommand(char *cmd, int len) {
 
+  trace << PSTR("Execute Command :" ) << (int)cmd[1] << PSTR("Taille buf : ") << len << endl;
   // Command processing
-  if (len > 3) {
+  if (len > 2) {
     int cmdId = cmd[1];
     switch (cmdId) {
       case 0x30:
@@ -285,7 +340,8 @@ void cmdGetID(char* cmd, int len) {
     com << RESPONSE_START_CHAR ;
     for (int u = 0; u < EEPROM_SIZE - 1; u++) com << id[u];
     //sock->write(id,EEPROM_SIZE);
-    com << PSTR(RESPONSE_END_STRING);
+    com << PSTR(RESPONSE_END_STRING) << flush;
+    trace << PSTR("Send ID") << endl;
   }
 }
 
@@ -343,7 +399,7 @@ void cmdGetPinStatus(char* cmd, int len) {
     char clientId = cmd[3];
     if (pinTable[pin] != NULL ) {
       InputPin* tmp = (InputPin*)pinTable[pin];
-      com << RESPONSE_START_CHAR << clientId << tmp->read() << PSTR(RESPONSE_END_STRING);
+      com << RESPONSE_START_CHAR << clientId << tmp->read() << PSTR(RESPONSE_END_STRING) << flush;
     }
   }
 }
@@ -382,7 +438,7 @@ void cmdAnalogRead(char* cmd, int len) {
     int pin = (int)cmd[2];
     char clientId = cmd[3];
     uint16_t value = AnalogPin::sample((Board::AnalogPin)pin, Board::AVCC_REFERENCE);
-    com << RESPONSE_START_CHAR << clientId << value  << PSTR(RESPONSE_END_STRING);
+    com << RESPONSE_START_CHAR << clientId << value  << PSTR(RESPONSE_END_STRING) << flush;
   }
 }
 

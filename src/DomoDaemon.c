@@ -522,11 +522,11 @@ void *connection_handler(void *socket_desc)
         devOpen->prev=DevicePointer;
     }
 	pthread_mutex_unlock(&mutexDevice);
-
+	sleep(3);
 	// Get device ID
     char getIdCmd[] = { COMMAND_START_CHAR, CMD_GET_DEVICE_ID, COMMAND_END_CHAR1, COMMAND_END_CHAR2, 0x00 };
     serialWriteString (devOpen->fd, getIdCmd);
-    syslog (LOG_INFO, "Thread Device %d : Send getID command for deive: %s command : %d,%d,%d,%d,%d\n",thID, d_name,getIdCmd[0],getIdCmd[1],getIdCmd[2],getIdCmd[3],getIdCmd[4]);
+    syslog (LOG_INFO, "Thread Device %d : Send getID command for deive: %s command : %d,%d,%d,%d,%d socket %d\n",thID, d_name,getIdCmd[0],getIdCmd[1],getIdCmd[2],getIdCmd[3],getIdCmd[4],devOpen->fd);
     
 	int i = 0;
     int j = 0;
