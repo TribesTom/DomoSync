@@ -14,7 +14,7 @@ cd src
 
 echo "Building src..."
 
-cc -o $TARGET_DIR/DomoDaemon DomoDaemon.c serial.c -lrt -lpthread -ludev
+cc -o $TARGET_DIR/DomoDaemon DomoDaemon.c serial.c -lrt -lpthread -ludev -g
 cc -o $TARGET_DIR/Domo.o -c -Wall -Werror -fPIC Domo.c
 cc -shared -o $TARGET_DIR/libDomo.so $TARGET_DIR/Domo.o -lrt
 cp Domo.py $TARGET_DIR/Domo.py
