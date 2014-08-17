@@ -73,22 +73,43 @@ void operator delete(void* ptr) {
 // Classe for button
 class PushButton : public Button {
   private:
-    uint8_t m_count;
+    bool state;
   public:
     PushButton(Board::DigitalPin pin, Button::Mode mode) :
       Button(pin, mode),
-      m_count(0)
+      state(false)
     {
     }
 
     virtual void on_change(uint8_t type)
     {
       UNUSED(type);
-      m_count += 1;
+      state = !state;
       int pin = get_pin();
       com << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING);
     }
+    bool get_state()
+    {
+      return state;
+    }
 };
+
+class Node {
+  private:
+   Pin* pinPtr;
+   Node* next;
+   Node* prev;
+   public:
+   Node(Pin* pin)
+   {
+     pinPtr=pin;
+   }
+   ~Node()
+   {
+     
+   }
+};
+
 
 
 void setup() {
