@@ -69,16 +69,34 @@ void* operator new(size_t size) {
 void operator delete(void* ptr) {
   if (ptr) free(ptr);
 }
+// Classe for manipulating dependencie between pin like interupter and light
+class Node {
+  public:
+    Pin* pinPtr;
+    Node* next;
+    Node* prev;
+  public:
+    Node(Pin* pin)
+    {
+      pinPtr = pin;
+    }
+    ~Node()
+    {
+
+    }
+};
 
 // Classe for button
 class PushButton : public Button {
   private:
     bool state;
+    Node* TorchList;
   public:
     PushButton(Board::DigitalPin pin, Button::Mode mode) :
       Button(pin, mode),
       state(false)
     {
+      TorchList=NULL;
     }
 
     virtual void on_change(uint8_t type)
@@ -87,28 +105,59 @@ class PushButton : public Button {
       state = !state;
       int pin = get_pin();
       com << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING);
+      Bascule();
     }
     bool get_state()
     {
       return state;
     }
+    void Bascule()
+    {
+      if (TorchList==NULL) return;
+      int looping = 1;
+      Node* ptr= TorchList;
+      Torch* tmp;
+      while (looping){
+       tmp=(Torch*)ptr->pinPtr;
+       tmp->write(1);
+       if (ptr->next != NULL ) ptr=ptr->next;
+       else looping =0;
+       }
+      delay(150);
+      ptr= TorchList;
+      looping = 1;
+      while (looping){
+       tmp=(Torch*)ptr->pinPtr;
+       tmp->write(0);
+       if (ptr->next != NULL ) ptr=ptr->next;
+       else looping =0;
+       }
+      }
+     void RemoveFromList(Torch *){
+        if (TorchList==NULL) return;
+       
+       }
+    
 };
-
-class Node {
-  private:
-   Pin* pinPtr;
-   Node* next;
-   Node* prev;
-   public:
-   Node(Pin* pin)
-   {
-     pinPtr=pin;
-   }
-   ~Node()
-   {
+class Torch : public OutputPin{
+  private: 
+   bool state;
+   Node* ButtonList;
+  public:
+    Torch(Board::DigitalPin pin) :
+    OutputPin(pin),
+    state(false)
+    {
+      ButtonList=NULL;
+      }
      
-   }
-};
+    
+} ;
+
+   
+  
+
+
 
 
 
@@ -165,28 +214,28 @@ void loop() {
   }
   //trace << PSTR("Wait command") << endl;
   int pos = 0;
-  char z='z';
+  char z = 'z';
   char cmd[10];
-  int len =0;
+  int len = 0;
   //trace << PSTR("Info sock : ") << sock << endl;
   if ( (len = sock->available()) > 0 ) {
-  trace << PSTR("Bytes Available :") <<len << endl;
+    trace << PSTR("Bytes Available :") << len << endl;
     while ( z != COMMAND_START_CHAR && pos < len )
     {
-      sock->read(&z,sizeof(char));
+      sock->read(&z, sizeof(char));
       pos++;
     }
     trace << PSTR("Process Command : ") ;
     int taille = 0;
     if (pos < len ) {
-     
-      
+
+
       while ( z != '\n' &&  taille < MAX_MSG_SIZE)
       {
-        
-        trace << taille << PSTR(":")<< (int)z;
+
+        trace << taille << PSTR(":") << (int)z;
         cmd[taille] = z;
-        sock->read(&z,sizeof(char));
+        sock->read(&z, sizeof(char));
         taille++;
       }
     }
@@ -194,37 +243,6 @@ void loop() {
     trace << PSTR("end") << endl;
     if ( pos < MAX_MSG_SIZE ) processCommand(cmd, taille + 1);
   }
-
-
-
-  /*if (( len = sock->peekchar('\n')) >= 0) {
-    int pos = 0;
-    char z;
-    // drop useless data
-    while ( (z = sock->getchar()) != COMMAND_START_CHAR && pos < len)
-    {
-      pos++;
-    }
-
-    // extract complete command
-    if (pos < len) {
-      {
-        int taille = 1;
-        char cmd[10];
-        cmd[0] = z;
-        while ((z = sock->getchar()) != '\n')
-
-        {
-          cmd[taille] = z;
-          taille++;
-        }
-        trace << PSTR("Process Command : ") << cmd << endl;
-        processCommand(cmd, taille + 1);
-
-
-      }
-    }
-  }*/
 }
 
 Socket* openConnection()
@@ -314,13 +332,13 @@ void processCommand(char *cmd, int len) {
         cmdPinModeOutput(cmd, len);
         break;
       case 0x32:
-        cmdPinModeInput(cmd, len);
-        break;
-      case 0x33:
         cmdSetPinUp(cmd, len);
         break;
-      case 0x34:
+      case 0x33:
         cmdSetPinDown(cmd, len);
+        break;
+      case 0x34:
+        cmdPinModeInput(cmd, len);
         break;
       case 0x35:
         cmdGetPinStatus(cmd, len);
@@ -341,7 +359,10 @@ void processCommand(char *cmd, int len) {
         cmdSetButton(cmd, len);
         break;
       case 0x41:
-        cmdAnalogSet(cmd, len);
+        cmdSetButtonTorch(cmd, len);
+        break;
+      case 0x42:
+        cmdRemButtonTorch(cmd, len);
         break;
       case 0x50:
         cmdReadDHT11(cmd, len);
@@ -349,6 +370,10 @@ void processCommand(char *cmd, int len) {
       case 0x51:
         cmdReadSR04(cmd, len);
         break;
+      case 0x60:
+        cmdSetTorch(cmd, len);
+        break;
+
     }
   }
 }
