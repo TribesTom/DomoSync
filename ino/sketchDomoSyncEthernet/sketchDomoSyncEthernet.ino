@@ -39,8 +39,6 @@ char idGen[EEPROM_SIZE] EEMEM;
 #define USE_ETHERNET_SHIELD
 #if defined(USE_ETHERNET_SHIELD)
 OutputPin sd(Board::D4, 1);
-//OutputPin ssp(Board::D53,1);
-//OutputPin ssp2(Board::D10,1);
 #endif
 // Network configuration
 #define MAC 0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed
@@ -75,7 +73,6 @@ class Node {
     Pin* pinPtr;
     Node* next;
     Node* prev;
-  public:
     Node(Pin* pin)
     {
       pinPtr = pin;
@@ -85,6 +82,24 @@ class Node {
 
     }
 };
+
+
+class Torch : public OutputPin {
+  private:
+    bool state;
+    Node* ButtonList;
+  public:
+    Torch(Board::DigitalPin pin) :
+      OutputPin(pin),
+      state(false)
+    {
+      ButtonList = NULL;
+    }
+
+
+} ;
+
+
 
 // Classe for button
 class PushButton : public Button {
@@ -96,7 +111,7 @@ class PushButton : public Button {
       Button(pin, mode),
       state(false)
     {
-      TorchList=NULL;
+      TorchList = NULL;
     }
 
     virtual void on_change(uint8_t type)
@@ -113,49 +128,71 @@ class PushButton : public Button {
     }
     void Bascule()
     {
-      if (TorchList==NULL) return;
+      if (TorchList == NULL) return;
       int looping = 1;
-      Node* ptr= TorchList;
+      Node* ptr = TorchList;
       Torch* tmp;
-      while (looping){
-       tmp=(Torch*)ptr->pinPtr;
-       tmp->write(1);
-       if (ptr->next != NULL ) ptr=ptr->next;
-       else looping =0;
-       }
+      while (looping) {
+        tmp = (Torch*)ptr->pinPtr;
+        tmp->write(1);
+        if (ptr->next != NULL ) ptr = ptr->next;
+        else looping = 0;
+      }
       delay(150);
-      ptr= TorchList;
+      ptr = TorchList;
       looping = 1;
-      while (looping){
-       tmp=(Torch*)ptr->pinPtr;
-       tmp->write(0);
-       if (ptr->next != NULL ) ptr=ptr->next;
-       else looping =0;
-       }
+      while (looping) {
+        tmp = (Torch*)ptr->pinPtr;
+        tmp->write(0);
+        if (ptr->next != NULL ) ptr = ptr->next;
+        else looping = 0;
       }
-     void RemoveFromList(Torch *){
-        if (TorchList==NULL) return;
-       
-       }
-    
-};
-class Torch : public OutputPin{
-  private: 
-   bool state;
-   Node* ButtonList;
-  public:
-    Torch(Board::DigitalPin pin) :
-    OutputPin(pin),
-    state(false)
-    {
-      ButtonList=NULL;
+    }
+    void RemoveFromList(Torch* ptrSearch) {
+      if (TorchList == NULL) return;
+      Node* ptrList = TorchList;
+      if ((Torch*)ptrList->pinPtr == ptrSearch) {
+        if (ptrList->next == NULL) TorchList = NULL;
+        else {
+          TorchList = ptrList->next;
+          TorchList->prev = NULL;
+        }
+        delete(ptrList);
+        return;
       }
-     
-    
-} ;
+      while (ptrList->next != NULL) {
+        ptrList = ptrList->next;
+        if ((Torch*)ptrList->pinPtr == ptrSearch) {
+          if (ptrList->next == NULL) ptrList->prev = NULL;
+          else {
+            ptrList->prev->next = ptrList->next;
+            ptrList->next->prev = ptrList->prev;
+          }
 
-   
-  
+          delete(ptrList);
+          return;
+        }
+
+      }
+    }
+    void AddToList(Torch* tor)
+    {
+      if(tor==NULL) return;
+      Node*tmp=new Node((Pin*)tor);
+      if(TorchList==NULL) TorchList=tmp;
+      else {
+        Node* ptrList = TorchList;
+        while(ptrList->next != NULL) ptrList=ptrList->next;
+        ptrList->next=tmp;
+        tmp->prev=ptrList;
+      }
+        
+    
+    }
+};
+
+
+
 
 
 
