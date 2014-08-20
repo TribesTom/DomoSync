@@ -802,9 +802,9 @@ int main(int argc, char **argv)
                 case MSG_SET_BUTTON:
                     sendCommand(CMD_SET_BUTTON, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
                     break;
-                case MSG_SET_PIN_PWM:
+		    /*case MSG_SET_PIN_PWM:
                     sendCommand(CMD_SET_ANALOG, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
-                    break;
+                    break;*/
                 case MSG_READ_DHT11:
                     sendCommand(CMD_READ_DHT11, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
                     break;
@@ -812,6 +812,15 @@ int main(int argc, char **argv)
                     sendCommandWithParameter(CMD_READ_SR04, clientId, targetFd,
                                              count > 3 ? (atoi (parts[3]) & 0xFF) : -1,
                                              count > 4 ? (atoi (parts[4]) & 0xFF) : -1);
+                    break;
+		case MSG_SET_BUT_TOR:
+		  sendCommandWithParameter(CMD_SET_BUT_TOR, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1,count > 4 ? atoi(parts[4]) : -1);
+                    break;
+                case MSG_REM_BUT_TOR:
+		  sendCommandWithParameter(CMD_REM_BUT_TOR, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1,count > 4 ? atoi(parts[4]) : -1);
+                    break;
+		case MSG_SET_TOR:
+                    sendCommand(CMD_SET_TOR, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
                     break;
                 }
             }

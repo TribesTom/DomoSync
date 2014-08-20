@@ -304,6 +304,17 @@ void setMasterButton(DomoDevice *dev, int pin)
 {
 	sendMessage(dev->in, MSG_SET_MASTER, dev->clientId, dev->fd, pin);
 }
+void setButTor(DomoDevice *dev, int pin, int value) {
+        sendMessageWithParameter(dev->in, MSG_SET_BUT_TOR, dev->clientId, dev->fd, pin, value);
+}
+void remButTor(DomoDevice *dev, int pin, int value) {
+        sendMessageWithParameter(dev->in, MSG_REM_BUT_TOR, dev->clientId, dev->fd, pin, value);
+}
+void setPinAsTorch(DomoDevice *dev, int pin)
+{
+        sendMessage(dev->in, MSG_SET_TOR, dev->clientId, dev->fd, pin);
+}
+
 
 int readDHT11(DomoDevice *dev, int pin)
 {

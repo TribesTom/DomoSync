@@ -70,6 +70,9 @@
 #define MSG_SET_MASTER 			19
 #define MSG_SET_BUTTON			20
 #define MSG_SET_PIN_PWM			21
+#define MSG_SET_BUT_TOR                 22
+#define MSG_REM_BUT_TOR                 23
+#define MSG_SET_TOR                     24
 
 #define MSG_READ_DHT11			41
 #define MSG_READ_SR04			42
@@ -78,19 +81,25 @@
 #define CMD_GET_DEVICE_ID  		0x30
 
 #define CMD_SET_PIN_OUTPUT		0x31
-#define CMD_SET_PIN_INPUT		0x32
-#define CMD_SET_PIN_HIGH		0x33
-#define CMD_SET_PIN_LOW			0x34
+#define CMD_SET_PIN_INPUT		0x34
+#define CMD_SET_PIN_HIGH		0x32
+#define CMD_SET_PIN_LOW			0x33
 #define CMD_GET_PIN_STATUS		0x35
+
 #define CMD_ANALOG_WRITE		0x36
 #define CMD_ANALOG_READ			0x37
-#define CMD_ANALOG_REFERENCE	0x38
+#define CMD_ANALOG_REFERENCE	        0x38
+
 #define CMD_SET_MASTER			0x39
+
 #define CMD_SET_BUTTON			0x40
-#define CMD_SET_ANALOG			0x41
+#define CMD_SET_BUT_TOR			0x41
+#define CMD_REM_BUT_TOR			0x42
 
 #define CMD_READ_DHT11			0x50
 #define CMD_READ_SR04			0x51
+
+#define CMD_SET_TOR                     0x60
 
 /*#define ASSERT_TRUE(x) \
     do { \

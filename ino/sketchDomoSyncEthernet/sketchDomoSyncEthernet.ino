@@ -90,10 +90,10 @@ class Node {
 
 // Classe torch to command telerupter
 class Torch : public OutputPin {
-  private:
+  public:
     bool state;
     Node* ButtonList;
-  public:
+  
     Torch(Board::DigitalPin pin) :
       OutputPin(pin),
       state(false)
@@ -109,10 +109,10 @@ class Torch : public OutputPin {
 
 // Classe for button to light lamp
 class PushButton : public Button {
-  private:
+  public:
     bool state;
     Node* TorchList;
-  public:
+
     PushButton(Board::DigitalPin pin, Button::Mode mode) :
       Button(pin, mode),
       state(false)
@@ -126,13 +126,13 @@ class PushButton : public Button {
       state = !state;
       int pin = get_pin();
       com << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING);
-      Bascule();
+      Bascule(state);
     }
     bool get_state()
     {
       return state;
     }
-    void Bascule()
+    void Bascule(bool etat)
     {
       if (TorchList == NULL) return;
       int looping = 1;
@@ -140,7 +140,7 @@ class PushButton : public Button {
       Torch* tmp;
       while (looping) {
         tmp = (Torch*)ptr->pinPtr;
-        tmp->write(1);
+        if(tmp->state != state ) tmp->write(1);
         if (ptr->next != NULL ) ptr = ptr->next;
         else looping = 0;
       }
@@ -149,7 +149,8 @@ class PushButton : public Button {
       looping = 1;
       while (looping) {
         tmp = (Torch*)ptr->pinPtr;
-        tmp->write(0);
+        if(tmp->state != state ) tmp->write(0);
+        tmp->state= state;
         if (ptr->next != NULL ) ptr = ptr->next;
         else looping = 0;
       }
@@ -618,6 +619,33 @@ void cmdSetButton(char* cmd, int len) {
     tmp->begin();
   }
 }
+// command to add Torch tu PushButton type pin
+// command : 55 41 09 17 0D 0A
+void cmdSetButtonTorch(char* cmd, int len) {
+  if (len > 5) {
+    int pin = (int)cmd[2];
+    int pinT = (int)cmd[3];
+    if (pinTable[pin] == NULL || pinTable[pinT]==NULL) return;
+    PushButton* tmpBut =(PushButton*) pinTable[pin];
+    tmpBut->AddToList((Torch*)pinTable[pinT]);
+    Torch* tmpT = (Torch*) pinTable[pinT];
+    tmpT->AddToList((PushButton*)pinTable[pin]);
+    
+  }
+}
+// command to remove Torch from PushButton
+// command : 55 42 09 17 0D 0A
+void cmdRemButtonTorch(char* cmd, int len) {
+  if (len > 5) {
+    int pin = (int)cmd[2];
+    int pinT = (int)cmd[3];
+    if (pinTable[pin] == NULL || pinTable[pinT]==NULL) return;
+    PushButton* tmpBut =(PushButton*) pinTable[pin];
+    tmpBut->RemoveFromList((Torch*)pinTable[pinT]);
+    Torch* tmpT = (Torch*) pinTable[pinT];
+    tmpT->RemoveFromList((PushButton*)pinTable[pin]);
+  }
+}
 
 // command to read DHT11 sensor
 // example: 55 50 04 01 0D 0A
@@ -630,4 +658,14 @@ void cmdReadDHT11(char* cmd, int len) {
 // example: 55 51 04 05 01 0D 0A
 void cmdReadSR04(char* cmd, int len) {
 
+}
+// command to define a Torch pin
+// command : 55 60 09 0D 0A
+void cmdSetTorch(char* cmd, int len) {
+  if (len > 4) {
+    int pin = (int)cmd[2];
+    if (pinTable[pin] != NULL) delete(pinTable[pin]);
+    Torch* tmp = new Torch((Board::DigitalPin)pin);
+    pinTable[pin] = tmp;
+  }
 }
