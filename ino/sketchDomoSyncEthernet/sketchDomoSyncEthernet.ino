@@ -67,6 +67,11 @@ void* operator new(size_t size) {
 void operator delete(void* ptr) {
   if (ptr) free(ptr);
 }
+// Daclare classes
+class PushButton ;
+class Node;
+class Torch  ;
+
 // Classe for manipulating dependencie between pin like interupter and light
 class Node {
   public:
@@ -83,7 +88,7 @@ class Node {
     }
 };
 
-
+// Classe torch to command telerupter
 class Torch : public OutputPin {
   private:
     bool state;
@@ -95,13 +100,14 @@ class Torch : public OutputPin {
     {
       ButtonList = NULL;
     }
-
-
+    ~Torch();
+    void AddToList(PushButton* but);
+    void RemoveFromList(PushButton* but);
 } ;
 
 
 
-// Classe for button
+// Classe for button to light lamp
 class PushButton : public Button {
   private:
     bool state;
@@ -177,21 +183,75 @@ class PushButton : public Button {
     }
     void AddToList(Torch* tor)
     {
-      if(tor==NULL) return;
-      Node*tmp=new Node((Pin*)tor);
-      if(TorchList==NULL) TorchList=tmp;
+      if (tor == NULL) return;
+      Node*tmp = new Node((Pin*)tor);
+      if (TorchList == NULL) TorchList = tmp;
       else {
         Node* ptrList = TorchList;
-        while(ptrList->next != NULL) ptrList=ptrList->next;
-        ptrList->next=tmp;
-        tmp->prev=ptrList;
+        while (ptrList->next != NULL) ptrList = ptrList->next;
+        ptrList->next = tmp;
+        tmp->prev = ptrList;
       }
-        
-    
+
+
     }
 };
 
+Torch::~Torch() {
 
+  if (ButtonList != NULL) {
+    Node* UsePtr;
+
+    int Looping = 1;
+    while (Looping) {
+      UsePtr = ButtonList;
+      PushButton* ButPtr;
+      if (ButtonList->next == NULL) Looping = 0;
+      else ButtonList = ButtonList->next;
+      ButPtr = (PushButton*)UsePtr->pinPtr;
+      ButPtr->RemoveFromList(this);
+      delete(UsePtr);
+    }
+  }
+};
+void Torch::RemoveFromList(PushButton* ptrSearch) {
+  if (ButtonList == NULL) return;
+  Node* ptrList = ButtonList;
+  if ((Button*)ptrList->pinPtr == ptrSearch) {
+    if (ptrList->next == NULL) ButtonList = NULL;
+    else {
+      ButtonList = ptrList->next;
+      ButtonList->prev = NULL;
+    }
+    delete(ptrList);
+    return;
+  }
+  while (ptrList->next != NULL) {
+    ptrList = ptrList->next;
+    if ((PushButton*)ptrList->pinPtr == ptrSearch) {
+      if (ptrList->next == NULL) ptrList->prev = NULL;
+      else {
+        ptrList->prev->next = ptrList->next;
+        ptrList->next->prev = ptrList->prev;
+      }
+
+      delete(ptrList);
+      return;
+    }
+  }
+};
+void Torch::AddToList(PushButton* but)
+{
+  if (but == NULL) return;
+  Node*tmp = new Node((Pin*)but);
+  if (ButtonList == NULL) ButtonList = tmp;
+  else {
+    Node* ptrList = ButtonList;
+    while (ptrList->next != NULL) ptrList = ptrList->next;
+    ptrList->next = tmp;
+    tmp->prev = ptrList;
+  }
+};
 
 
 
