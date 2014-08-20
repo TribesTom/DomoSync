@@ -620,7 +620,7 @@ void cmdSetButton(char* cmd, int len) {
   }
 }
 // command to add Torch tu PushButton type pin
-// command : 55 41 09 17 0D 0A
+// command : 55 41 17 09 0D 0A
 void cmdSetButtonTorch(char* cmd, int len) {
   if (len > 5) {
     int pin = (int)cmd[2];
@@ -634,7 +634,7 @@ void cmdSetButtonTorch(char* cmd, int len) {
   }
 }
 // command to remove Torch from PushButton
-// command : 55 42 09 17 0D 0A
+// command : 55 42 17 09 0D 0A
 void cmdRemButtonTorch(char* cmd, int len) {
   if (len > 5) {
     int pin = (int)cmd[2];

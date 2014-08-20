@@ -60,6 +60,12 @@ extern int analogRead(DomoDevice *dev, int pin);
 extern void setPinAsButton(DomoDevice *dev, int pin);
 
 extern void setMasterButton(DomoDevice *dev, int pin);
+
+extern void setButTor(DomoDevice *dev, int pin, int value);
+
+extern void remButTor(DomoDevice *dev, int pin, int value);
+
+extern void setPinAsTorch(DomoDevice *dev, int pin);
 /**
  * Configures the reference voltage used for analog input
  * (i.e. the value used as the top of the input range)
