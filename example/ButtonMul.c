@@ -25,9 +25,9 @@ int main(int argc, char **argv)
       setPinAsTorch(&dev,pinMap[24]);
       setPinAsTorch(&dev,pinMap[25]);
       setPinAsTorch(&dev,pinMap[26]);
-//      setButTor(&dev,pinMap[22],pinMap[24]);
-//      setButTor(&dev,pinMap[22],pinMap[25]);
-//      setButTor(&dev,pinMap[22],pinMap[26]);
+      setButTor(&dev,pinMap[22],pinMap[24]);
+      setButTor(&dev,pinMap[22],pinMap[25]);
+      setButTor(&dev,pinMap[22],pinMap[26]);
       
 
 
@@ -41,6 +41,18 @@ int main(int argc, char **argv)
 	printf("Changement : %d",loop);
 	loop=loop-1;
 	  }
+
+	remButTor(&dev,pinMap[22],pinMap[24]);
+	loop=5;
+        while(loop > 0 )
+          {
+        response=waitForStringBlock(&dev, &errorcode);
+        printf("Changement : %d",loop);
+        loop=loop-1;
+	}
+
+
+
         
         
     }

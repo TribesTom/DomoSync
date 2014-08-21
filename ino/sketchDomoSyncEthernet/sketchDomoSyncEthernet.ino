@@ -44,7 +44,7 @@ OutputPin sd(Board::D4, 1);
 #define MAC 0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed
 #define IP 192,168,1,110
 #define SUBNET 255,255,255,0
-#define IPREMOTE 192,168,1,3
+#define IPREMOTE 192,168,1,2
 #define PORT 8888
 static const uint8_t mac[6] __PROGMEM = { MAC };
 
@@ -81,6 +81,8 @@ class Node {
     Node(Pin* pin)
     {
       pinPtr = pin;
+      next=NULL;
+      prev=NULL;
     }
     ~Node()
     {
@@ -95,7 +97,7 @@ class Torch : public OutputPin {
     Node* ButtonList;
   
     Torch(Board::DigitalPin pin) :
-      OutputPin(pin),
+      OutputPin(pin,1),
       state(false)
     {
       ButtonList = NULL;
@@ -122,10 +124,11 @@ class PushButton : public Button {
 
     virtual void on_change(uint8_t type)
     {
+      
       UNUSED(type);
       state = !state;
       int pin = get_pin();
-      com << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING);
+      com << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING)<< flush;
       Bascule(state);
     }
     bool get_state()
@@ -140,16 +143,17 @@ class PushButton : public Button {
       Torch* tmp;
       while (looping) {
         tmp = (Torch*)ptr->pinPtr;
-        if(tmp->state != state ) tmp->write(1);
+        trace << PSTR("Loop ETAT1 :") << tmp->get_pin() << endl << flush;
+        if(tmp->state != state ) tmp->write(0);
         if (ptr->next != NULL ) ptr = ptr->next;
         else looping = 0;
       }
-      delay(150);
+      delay(1000);
       ptr = TorchList;
       looping = 1;
       while (looping) {
         tmp = (Torch*)ptr->pinPtr;
-        if(tmp->state != state ) tmp->write(0);
+        if(tmp->state != state ) tmp->write(1);
         tmp->state= state;
         if (ptr->next != NULL ) ptr = ptr->next;
         else looping = 0;
@@ -190,6 +194,7 @@ class PushButton : public Button {
       else {
         Node* ptrList = TorchList;
         while (ptrList->next != NULL) ptrList = ptrList->next;
+        trace << endl;
         ptrList->next = tmp;
         tmp->prev = ptrList;
       }
@@ -245,7 +250,7 @@ void Torch::AddToList(PushButton* but)
 {
   if (but == NULL) return;
   Node*tmp = new Node((Pin*)but);
-  if (ButtonList == NULL) ButtonList = tmp;
+  if (ButtonList == NULL) ButtonList = tmp; 
   else {
     Node* ptrList = ButtonList;
     while (ptrList->next != NULL) ptrList = ptrList->next;
