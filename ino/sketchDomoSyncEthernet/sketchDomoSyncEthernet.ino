@@ -81,8 +81,8 @@ class Node {
     Node(Pin* pin)
     {
       pinPtr = pin;
-      next=NULL;
-      prev=NULL;
+      next = NULL;
+      prev = NULL;
     }
     ~Node()
     {
@@ -95,9 +95,9 @@ class Torch : public OutputPin {
   public:
     bool state;
     Node* ButtonList;
-  
+
     Torch(Board::DigitalPin pin) :
-      OutputPin(pin,1),
+      OutputPin(pin, 1),
       state(false)
     {
       ButtonList = NULL;
@@ -105,6 +105,12 @@ class Torch : public OutputPin {
     ~Torch();
     void AddToList(PushButton* but);
     void RemoveFromList(PushButton* but);
+    void Up();
+    void Down();
+    bool get_state()
+    {
+      return state;
+    }
 } ;
 
 
@@ -124,11 +130,11 @@ class PushButton : public Button {
 
     virtual void on_change(uint8_t type)
     {
-      
+
       UNUSED(type);
       state = !state;
       int pin = get_pin();
-      com << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING)<< flush;
+      com << RESPONSE_START_CHAR << clientMaster << pin << PSTR(RESPONSE_END_STRING) << flush;
       Bascule(state);
     }
     bool get_state()
@@ -144,7 +150,7 @@ class PushButton : public Button {
       while (looping) {
         tmp = (Torch*)ptr->pinPtr;
         trace << PSTR("Loop ETAT1 :") << tmp->get_pin() << endl << flush;
-        if(tmp->state != state ) tmp->write(0);
+        if (tmp->state != state ) tmp->write(0);
         if (ptr->next != NULL ) ptr = ptr->next;
         else looping = 0;
       }
@@ -153,8 +159,8 @@ class PushButton : public Button {
       looping = 1;
       while (looping) {
         tmp = (Torch*)ptr->pinPtr;
-        if(tmp->state != state ) tmp->write(1);
-        tmp->state= state;
+        if (tmp->state != state ) tmp->write(1);
+        tmp->state = state;
         if (ptr->next != NULL ) ptr = ptr->next;
         else looping = 0;
       }
@@ -250,13 +256,29 @@ void Torch::AddToList(PushButton* but)
 {
   if (but == NULL) return;
   Node*tmp = new Node((Pin*)but);
-  if (ButtonList == NULL) ButtonList = tmp; 
+  if (ButtonList == NULL) ButtonList = tmp;
   else {
     Node* ptrList = ButtonList;
     while (ptrList->next != NULL) ptrList = ptrList->next;
     ptrList->next = tmp;
     tmp->prev = ptrList;
   }
+};
+void Torch::Up()
+{
+  if (state == true) return;
+  write(1);
+  delay(150);
+  write(0);
+  state = !state;
+};
+void Torch::Down()
+{
+  if (state == false) return;
+  write(1);
+  delay(150);
+  write(0);
+  state = !state;
 };
 
 
@@ -476,6 +498,15 @@ void processCommand(char *cmd, int len) {
       case 0x60:
         cmdSetTorch(cmd, len);
         break;
+      case 0x61:
+        cmdSetTorchUp(cmd, len);
+        break;
+      case 0x62:
+        cmdSetTorchDown(cmd, len);
+        break;
+      case 0x63:
+        cmdGetTorchStatus(cmd, len);
+        break;
 
     }
   }
@@ -630,12 +661,12 @@ void cmdSetButtonTorch(char* cmd, int len) {
   if (len > 5) {
     int pin = (int)cmd[2];
     int pinT = (int)cmd[3];
-    if (pinTable[pin] == NULL || pinTable[pinT]==NULL) return;
-    PushButton* tmpBut =(PushButton*) pinTable[pin];
+    if (pinTable[pin] == NULL || pinTable[pinT] == NULL) return;
+    PushButton* tmpBut = (PushButton*) pinTable[pin];
     tmpBut->AddToList((Torch*)pinTable[pinT]);
     Torch* tmpT = (Torch*) pinTable[pinT];
     tmpT->AddToList((PushButton*)pinTable[pin]);
-    
+
   }
 }
 // command to remove Torch from PushButton
@@ -644,8 +675,8 @@ void cmdRemButtonTorch(char* cmd, int len) {
   if (len > 5) {
     int pin = (int)cmd[2];
     int pinT = (int)cmd[3];
-    if (pinTable[pin] == NULL || pinTable[pinT]==NULL) return;
-    PushButton* tmpBut =(PushButton*) pinTable[pin];
+    if (pinTable[pin] == NULL || pinTable[pinT] == NULL) return;
+    PushButton* tmpBut = (PushButton*) pinTable[pin];
     tmpBut->RemoveFromList((Torch*)pinTable[pinT]);
     Torch* tmpT = (Torch*) pinTable[pinT];
     tmpT->RemoveFromList((PushButton*)pinTable[pin]);
@@ -674,3 +705,41 @@ void cmdSetTorch(char* cmd, int len) {
     pinTable[pin] = tmp;
   }
 }
+
+// command to set a Torch Up
+// command : 55 61 09 0D 0A
+void cmdSetTorchUp(char* cmd, int len) {
+  if (len > 4) {
+    int pin = (int)cmd[2];
+    if (pinTable[pin] != NULL ) {
+      Torch* tmp = (Torch*)pinTable[pin];
+      tmp->Up();
+    }
+  }
+}
+// command to set a Torch Down
+// command : 55 62 09 0D 0A
+void cmdSetTorchDown(char* cmd, int len) {
+  if (len > 4) {
+    int pin = (int)cmd[2];
+    if (pinTable[pin] != NULL ) {
+      Torch* tmp = (Torch*)pinTable[pin];
+      tmp->Down();
+    }
+  }
+}
+// command to get a Torch state
+// command : 55 63 09 18 0D 0A
+void cmdGetTorchStatus(char* cmd, int len) {
+  if (len > 5) {
+    int pin = (int)cmd[2];
+    char clientId = cmd[3];
+    uint16_t value = -1 ;
+    if (pinTable[pin] != NULL ) {
+      Torch* tmp = (Torch*)pinTable[pin];
+      value = (uint16_t) tmp->get_state();
+    }
+    com << RESPONSE_START_CHAR << clientId << value  << PSTR(RESPONSE_END_STRING) << flush;
+  }
+}
+
