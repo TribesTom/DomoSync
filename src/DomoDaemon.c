@@ -822,6 +822,15 @@ int main(int argc, char **argv)
 		case MSG_SET_TOR:
                     sendCommand(CMD_SET_TOR, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
                     break;
+		case MSG_SET_TOR_UP:
+		    sendCommand(CMD_SET_TOR_UP, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
+		    break;
+		case MSG_SET_TOR_DOWN:
+		    sendCommand(CMD_SET_TOR_DOWN, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
+		    break;
+		case MSG_GET_TOR_STATUS:
+                    sendCommand(CMD_GET_TOR_STATUS, clientId, targetFd, count > 3 ? atoi(parts[3]) : -1);
+                    break;
                 }
             }
         }

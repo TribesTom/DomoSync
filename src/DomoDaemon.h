@@ -73,6 +73,9 @@
 #define MSG_SET_BUT_TOR                 22
 #define MSG_REM_BUT_TOR                 23
 #define MSG_SET_TOR                     24
+#define MSG_SET_TOR_UP                  25
+#define MSG_SET_TOR_DOWN                26
+#define MSG_GET_TOR_STATUS              27
 
 #define MSG_READ_DHT11			41
 #define MSG_READ_SR04			42
@@ -100,6 +103,10 @@
 #define CMD_READ_SR04			0x51
 
 #define CMD_SET_TOR                     0x60
+#define CMD_SET_TOR_UP                  0x61
+#define CMD_SET_TOR_DOWN                0x62
+#define CMD_GET_TOR_STATUS              0x63
+
 
 /*#define ASSERT_TRUE(x) \
     do { \

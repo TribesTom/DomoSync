@@ -314,7 +314,23 @@ void setPinAsTorch(DomoDevice *dev, int pin)
 {
         sendMessage(dev->in, MSG_SET_TOR, dev->clientId, dev->fd, pin);
 }
+void setPinTorchUp(DomoDevice *dev, int pin)
+{
+        sendMessage(dev->in, MSG_SET_TOR_UP, dev->clientId, dev->fd, pin);
+}
 
+void setPinTorchDown(DomoDevice *dev, int pin)
+{
+        sendMessage(dev->in, MSG_SET_TOR_DOWN, dev->clientId, dev->fd, pin);
+}
+
+int getPinTorchStatus(DomoDevice *dev, int pin)
+{
+        sendMessage(dev->in, MSG_GET_TOR_STATUS, dev->clientId, dev->fd, pin);
+	int errorCode = 0;
+	int result = waitForInteger(dev, &errorCode);
+	return errorCode == 0 ? result : -1;
+}
 
 int readDHT11(DomoDevice *dev, int pin)
 {
