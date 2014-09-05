@@ -137,6 +137,7 @@ DomoDevice internalAttachDevice (char *id, int printError)
     	if (dev.fd == -1)
     	{
     		printLog ("Device has been attached already.\n");
+		mq_unlink (queueName);
     	}
     	else
     	{

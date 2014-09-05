@@ -759,10 +759,14 @@ int main(int argc, char **argv)
                     sprintf (CliList[clientId].messageQueueName,"%s%d", RESPONSE_QUEUE_PREFIX, clientId);
                     CliList[clientId].mq = mq_open (CliList[clientId].messageQueueName, O_WRONLY);
                     int fdTarget = searchTarget(parts[3]);
-                    char fdBuf[16];
-                    memset (fdBuf, 0, sizeof fdBuf);
-                    sprintf (fdBuf,"%d", fdTarget);
-                    if (CliList[clientId].mq != (mqd_t) -1 ) mq_send (CliList[clientId].mq, fdBuf , strlen (fdBuf), 0);
+                    if(fdTarget == -1 )  mq_close(CliList[clientId].mq);
+		    else {
+			char fdBuf[16];
+                    	memset (fdBuf, 0, sizeof fdBuf);
+                    	sprintf (fdBuf,"%d", fdTarget);
+                    	if (CliList[clientId].mq != (mqd_t) -1 ) mq_send (CliList[clientId].mq, fdBuf , strlen (fdBuf), 0);
+			else  mq_close(CliList[clientId].mq);
+			}
                     break;
                     //Close Client
                 case MSG_CLOSE_DEVICE:
