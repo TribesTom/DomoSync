@@ -44,7 +44,7 @@ OutputPin sd(Board::D4, 1);
 #define MAC 0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed
 #define IP 192,168,1,110
 #define SUBNET 255,255,255,0
-#define IPREMOTE 192,168,1,2
+#define IPREMOTE 192,168,1,101
 #define PORT 8888
 static const uint8_t mac[6] __PROGMEM = { MAC };
 
