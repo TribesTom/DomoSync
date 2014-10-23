@@ -44,12 +44,7 @@ W5100 ethernet(mac);
 
 uint32_t time ;
 
-// Sensors definitions
 
-DS18B20* temp[10]={ NULL};
-OWI* owiCannal[10]={ NULL};
-DHT22* dht22Dev[10]={ NULL};
-bool requestDone = false;
 
 // Example WebServer that responds with HTTP page with state of pins
 class WebServer : public HTTP::Server {
@@ -124,6 +119,16 @@ class PushButton : public Button {
       executeButton(pin, state);
     }
 };
+
+class DS18B20E : public DS18B20 {
+  public :
+    int idx;
+    DS18B20E(OWI *pin, const char *name = NULL, int idxtmp=0) :
+      DS18B20(pin, name)
+    {
+      idx = idxtmp;
+    }
+};
 // Defenition classe client web
 
 class WebClient : public HTTP::Client {
@@ -163,6 +168,14 @@ WebClient::on_response(const char* hostname, const char* path)
 }
 // Definition du web client
 WebClient client;
+
+// Sensors definitions
+
+DS18B20E* temp[10] = { NULL};
+OWI* owiCannal[10] = { NULL};
+DHT22* dht22Dev[10] = { NULL};
+bool requestDone = false;
+
 
 void setup()
 {
@@ -264,31 +277,31 @@ void sensorsConvert()
 void ds18b20convert()
 {
   for (uint8_t i = 0; i < membersof(owiCannal); i++) {
-    if(owiCannal[i] != NULL) DS18B20::convert_request(owiCannal[i], 12, true);
+    if (owiCannal[i] != NULL) DS18B20::convert_request(owiCannal[i], 12, true);
   }
 }
 void readSensors()
 {
-  
+
   for (uint8_t i = 0; i < membersof(temp); i++) {
-    if(temp[i] != NULL) temp[i]->read_scratchpad();
-    
+    if (temp[i] != NULL) temp[i]->read_scratchpad();
+
   }
   client.begin(ethernet.socket(Socket::TCP));
   for (uint8_t i = 0; i < membersof(temp); i++) {
-    if(temp[i] != NULL) { 
-       sendJsonTemp(temp[i]->idx,temp[i]->get_temperature ());
-      }
-    
+    if (temp[i] != NULL) {
+      sendJsonTemp(temp[i]->idx, temp[i]->get_temperature ());
+    }
+
   }
   client.end();
 }
 void sendJsonTemp(int idx, int16_t temperature)
 {
-  String command="http://192.168.1.101json.htm?type=command&param=udevice&idx=";
-  command+=String(idx);
-  command+="&nvalue=0&svalue=";
-  command+=String(temperature);
+  String command = "http://192.168.1.101json.htm?type=command&param=udevice&idx=";
+  command += String(idx);
+  command += "&nvalue=0&svalue=";
+  command += String(temperature);
   client.get(command.c_str());
 }
 
