@@ -19,6 +19,7 @@
 #include "Cosa/String.hh"
 #include "Cosa/OWI/Driver/DS18B20.hh"
 #include "Cosa/Driver/DHT.hh"
+
 // EEPROM variable
 
 #define USE_ETHERNET_SHIELD
@@ -31,6 +32,12 @@ OutputPin sd(Board::D4, 1);
 #define SUBNET 255,255,255,0
 #define IPREMOTE 192,168,1,101
 #define PORT 8888
+
+// Client web type
+
+#define UPDATE 0
+#define GETSTAT 1
+
 static const uint8_t mac[6] __PROGMEM = { MAC };
 
 // W5100 Ethernet Controller
@@ -123,7 +130,7 @@ class PushButton : public Button {
 class DS18B20E : public DS18B20 {
   public :
     int idx;
-    DS18B20E(OWI *pin, const char *name = NULL, int idxtmp=0) :
+    DS18B20E(OWI *pin, const char *name = NULL, int idxtmp = 0) :
       DS18B20(pin, name)
     {
       idx = idxtmp;
@@ -133,6 +140,10 @@ class DS18B20E : public DS18B20 {
 
 class WebClient : public HTTP::Client {
   public:
+    int typeClient = UPDATE;
+    int value = 0;
+    int etat = -1;
+    int idx=0;
     virtual void on_response(const char* hostname, const char* path);
 };
 void
@@ -140,28 +151,55 @@ WebClient::on_response(const char* hostname, const char* path)
 {
   uint32_t start = Watchdog::millis();
   uint32_t count = 0L;
-  char buf[129];
-  int res;
-  trace << PSTR("URL: http://") << (char*) hostname;
-  if (*path) trace << '/' << (char*) path;
-  trace << endl;
-#if defined(PRINT_RESPONSE)
-  while ((res = m_sock->read(buf, sizeof(buf) - 1)) >= 0) {
-    if (res > 0) {
-      buf[res] = 0;
-      trace << buf;
-      count += res;
-    }
+  char buf[32] = {0};
+  char res;
+  int i = 0;
+  switch (typeClient)
+  {
+    case UPDATE :
+
+      while ((res = m_sock->getchar()) >= 0) {
+        buf[i] = res;
+        if (res == '\n')
+        {
+          if ( String(buf).startsWith("\"status\""))
+          {
+            if (buf[12] == 'O') value = 1;
+
+          }
+          for (int j = 0; j < 32; j++) buf[j] = 0;
+          i = 0;
+
+        }
+      }
+
+    case GETSTAT :
+
+      while ((res = m_sock->getchar()) >= 0) {
+        buf[i] = res;
+        if (res == '\n')
+        {
+          if ( String(buf).startsWith("\"Data\""))
+          {
+            if (buf[11] == 'n') value = 1;
+            if (buf[11] == 'f') value = 0;
+          }
+          if ( String(buf).startsWith("\"Idx\""))
+          {
+            int j = 0;
+            char idxChar[3];
+            while (buf[i + j] != 34) idxChar[j] = buf[i + j] ;
+            idx = (int)String(idxChar).toInt();
+          }
+
+
+          for (int j = 0; j < 32; j++) buf[j] = 0;
+          i = 0;
+
+        }
+      }
   }
-#else
-  while ((res = m_sock->read(buf, sizeof(buf) - 1)) >= 0) {
-    if (res > 0) {
-      trace << '.';
-      count += res;
-      if ((count & 0xfffL) == 0) trace << endl;
-    }
-  }
-#endif
+
   if ((count & 0xfffL) != 0) trace << endl;
   trace << PSTR("Total (byte): ") << count << endl;
   trace << PSTR("Time (ms): ") << Watchdog::millis() - start << endl;
