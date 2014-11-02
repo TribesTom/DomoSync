@@ -239,6 +239,11 @@ OWI* owiCannal[10] = { NULL};
 DHT22* dht22Dev[10] = { NULL};
 bool requestDone = false;
 
+// Tableau état des telerupteurs
+
+bool telerupteur[100] = {false};
+
+
 
 // Define button
 
@@ -308,7 +313,10 @@ void CmdExecute(int pin, int cmd ) {
       pinDown(pin);
       break;
     case 3:
-      pinTelerupteur(pin);
+      pinTelerupteurUp(pin);
+      break;
+    case 4:
+      pinTelerupteurDown(pin);
       break;
     default :
       break;
@@ -329,6 +337,16 @@ void pinUp(int pin)
 void pinDown(int pin)
 {
   OutputPin((Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]), 0);
+}
+void pinTelerupteurUp(int pin)
+{
+  if (telerupteur[pin] == false) pinTelerupteur(pin);
+  telerupteur[pin] = true;
+}
+void pinTelerupteurDown(int pin)
+{
+  if (telerupteur[pin] == true) pinTelerupteur(pin);
+  telerupteur[pin] = false;
 }
 void pinTelerupteur(int pin)
 {
