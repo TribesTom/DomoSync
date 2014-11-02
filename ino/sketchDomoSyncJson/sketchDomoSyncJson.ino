@@ -19,9 +19,10 @@
 #include "Cosa/String.hh"
 #include "Cosa/OWI/Driver/DS18B20.hh"
 #include "Cosa/Driver/DHT.hh"
+#include "Cosa/Memory.h"
 
 // EEPROM variable
-
+#define DEBUG
 #define USE_ETHERNET_SHIELD
 #if defined(USE_ETHERNET_SHIELD)
 OutputPin sd(Board::D4, 1);
@@ -71,8 +72,9 @@ void
 WebServer::on_request(IOStream& page, char* method, char* path, char* query)
 {
 
-
-  trace << PSTR("Request Here : ") << path << query ;
+#if defined(DEBUG)
+  trace << PSTR("Request Here : ") << path << query << endl ;
+#endif
   // Get client connection information; MAC, IP address and port
   INET::addr_t addr;
   get_client(addr);
@@ -99,12 +101,13 @@ WebServer::on_request(IOStream& page, char* method, char* path, char* query)
   }
   long pin = String(pinChar).toInt();
   long cmd = String(pinCmd).toInt();
-  
+#if defined(DEBUG)
   trace << PSTR("Request Execute : Pin :") << pin << PSTR("Cmd :")  << cmd << endl;
-  
+#endif
   CmdExecute(pin, cmd);
-  trace << PSTR("Free memory : ") <<free_memory() << endl;
-
+#if defined(DEBUG)
+  trace << PSTR("Free memory : ") << free_memory() << endl;
+#endif
 
 }
 
@@ -126,6 +129,7 @@ void WebClient::on_response(const char* hostname, const char* path)
   char buf[32] = {0};
   char res;
   int i = 0;
+  etat = 0 ;
   switch (typeClient)
   {
     case UPDATE :
@@ -144,6 +148,7 @@ void WebClient::on_response(const char* hostname, const char* path)
 
         }
       }
+      break;
 
     case GETSTAT :
 
@@ -170,11 +175,17 @@ void WebClient::on_response(const char* hostname, const char* path)
 
         }
       }
+#if defined(DEBUG)
+      trace << PSTR("Idx : ") << idx << PSTR(" Data : ") << value << endl;
+#endif
+      break;
   }
+  etat = 1;
+#if defined(DEBUG)
 
-  if ((count & 0xfffL) != 0) trace << endl;
   trace << PSTR("Total (byte): ") << count << endl;
   trace << PSTR("Time (ms): ") << Watchdog::millis() - start << endl;
+#endif
 }
 
 
@@ -184,16 +195,20 @@ class PushButton : public Button {
     bool state;
     int idx;
     int hummanPin;
-    PushButton(Board::DigitalPin pin, Button::Mode mode, int idxtmp,int humman) :
+    PushButton(Board::DigitalPin pin, Button::Mode mode, int idxtmp, int humman) :
       Button(pin, mode),
       state(false)
     {
 
       idx = idxtmp;
       hummanPin = humman;
+
     }
     virtual void on_change(uint8_t type)
     {
+#if defined(DEBUG)
+      trace << PSTR("Button : on_change : hummanpin : ") << hummanPin << PSTR(" Internal Pin : ") << get_pin() << endl ;
+#endif
       UNUSED(type);
       state = !state;
       executeButton(hummanPin, state);
@@ -225,12 +240,17 @@ DHT22* dht22Dev[10] = { NULL};
 bool requestDone = false;
 
 
+// Define button
+
+PushButton buttonElec(Board::D22, Button::ON_FALLING_MODE, 8, 22);
+
 void setup()
 {
   // Initiate uart and trace output stream. And watchdog
   uart.begin(9600);
   trace.begin(&uart, PSTR("CosaPinWebServer: started"));
-  Watchdog::begin();
+  //Watchdog::begin();
+  Watchdog::begin(16, Watchdog::push_timeout_events);
   time = Watchdog::millis();
   // Initiate ethernet controller with address
   uint8_t ip[4] = { IP };
@@ -244,15 +264,18 @@ void setup()
 
   // Start the server
   ASSERT(server.begin(ethernet.socket(Socket::TCP, PORT)));
+#if defined(DEBUG)
   trace << PSTR("End setup, Serve listening on ") << ip << PORT;
-
+#endif
 }
+
 
 void loop()
 {
   // Service incoming requests
-  
-  trace << PSTR("Begin loop");
+#if defined(DEBUG)
+  trace << PSTR("Begin loop, Event queue size : ") << Event::queue.available() << endl;
+#endif
   Event event;
   if (Event::queue.available() > 0 ) Event::queue.await(&event); //Event::queue.await(&event);
   event.dispatch();
@@ -266,9 +289,13 @@ void loop()
     readSensors();
     requestDone == false;
   }
-  trace << PSTR("Begin run");
-  server.run();
-trace << PSTR("End run");
+#if defined(DEBUG)
+  trace << PSTR("Begin run") << endl;
+#endif
+  server.run(1000);
+#if defined(DEBUG)
+  trace << PSTR("End run") << endl;
+#endif
 }
 
 void CmdExecute(int pin, int cmd ) {
@@ -291,7 +318,8 @@ void CmdExecute(int pin, int cmd ) {
 // Initialise pin change it to your configuration
 void initPin()
 {
-  PushButton buttonElec(digital_pin_map[22],Button::ON_FALLING_MODE,8,22);
+
+  buttonElec.begin();
 
 }
 void pinUp(int pin)
@@ -304,23 +332,33 @@ void pinDown(int pin)
 }
 void pinTelerupteur(int pin)
 {
+#if defined(DEBUG)
   trace << PSTR( "Pin Telerupteur Pin : ") << pin << PSTR(" digital pin map : ") << (Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]) << endl;
+#endif
   OutputPin OPin = OutputPin((Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]), 0);
   delay(500);
   OPin.write(1);
 }
 void executeButton(int pin, bool state)
 {
+#if defined(DEBUG)
+  trace << ("Buton:ExecuteButton: client begin ") << endl ;
+#endif
   client.begin(ethernet.socket(Socket::TCP));
+  client.typeClient = UPDATE;
   switch (pin)
   {
-    case 10:
-      if (state) client.get("http://192.168.1.101/json.htm?type=command&param=switchlight&idx=8&switchcmd=On&level=0&passcode=");
-      else client.get("http://192.168.1.101/json.htm?type=command&param=switchlight&idx=8&switchcmd=Off&level=0&passcode=");
+    case 22:
+#if defined(DEBUG)
+      trace << ("Buton: Case 22 : client get, state : ") << state << endl ;
+#endif
+      if (state) client.get("http://192.168.1.101:8080/json.htm?type=command&param=switchlight&idx=8&switchcmd=On&level=0&passcode=");
+      else client.get("http://192.168.1.101:8080/json.htm?type=command&param=switchlight&idx=8&switchcmd=Off&level=0&passcode=");
       break;
 
   }
   client.end();
+  client.etat = -1;
 }
 void sensorsConvert()
 {
@@ -348,6 +386,7 @@ void readSensors()
 
   }
   client.end();
+  client.etat = -1;
 }
 void sendJsonTemp(int idx, int16_t temperature)
 {
