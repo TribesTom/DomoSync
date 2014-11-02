@@ -22,7 +22,7 @@
 #include "Cosa/Memory.h"
 
 // EEPROM variable
-#define DEBUG
+//#define DEBUG1
 #define USE_ETHERNET_SHIELD
 #if defined(USE_ETHERNET_SHIELD)
 OutputPin sd(Board::D4, 1);
@@ -242,7 +242,7 @@ bool requestDone = false;
 // Tableau état des telerupteurs
 
 bool telerupteur[100] = {false};
-
+Event event;
 
 
 // Define button
@@ -281,7 +281,7 @@ void loop()
 #if defined(DEBUG)
   trace << PSTR("Begin loop, Event queue size : ") << Event::queue.available() << endl;
 #endif
-  Event event;
+  
   if (Event::queue.available() > 0 ) Event::queue.await(&event); //Event::queue.await(&event);
   event.dispatch();
   uint32_t time_tmp = Watchdog::millis();
@@ -297,7 +297,7 @@ void loop()
 #if defined(DEBUG)
   trace << PSTR("Begin run") << endl;
 #endif
-  server.run(1000);
+  server.run(100);
 #if defined(DEBUG)
   trace << PSTR("End run") << endl;
 #endif
