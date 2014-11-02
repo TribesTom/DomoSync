@@ -72,7 +72,7 @@ WebServer::on_request(IOStream& page, char* method, char* path, char* query)
 {
 
 
-
+  trace << PSTR("Request Here : ") << path << query ;
   // Get client connection information; MAC, IP address and port
   INET::addr_t addr;
   get_client(addr);
@@ -99,43 +99,15 @@ WebServer::on_request(IOStream& page, char* method, char* path, char* query)
   }
   long pin = String(pinChar).toInt();
   long cmd = String(pinCmd).toInt();
+  
+  trace << PSTR("Request Execute : Pin :") << pin << PSTR("Cmd :")  << cmd << endl;
+  
   CmdExecute(pin, cmd);
+  trace << PSTR("Free memory : ") <<free_memory() << endl;
 
 
 }
-// Definition du webserver
-WebServer server;
 
-// Definition classe button
-class PushButton : public Button {
-  public:
-    bool state;
-    int idx;
-    PushButton(Board::DigitalPin pin, Button::Mode mode, int idxtmp) :
-      Button(pin, mode),
-      state(false)
-    {
-
-      idx = idxtmp;
-    }
-    virtual void on_change(uint8_t type)
-    {
-      UNUSED(type);
-      state = !state;
-      int pin = get_pin();
-      executeButton(pin, state);
-    }
-};
-
-class DS18B20E : public DS18B20 {
-  public :
-    int idx;
-    DS18B20E(OWI *pin, const char *name = NULL, int idxtmp = 0) :
-      DS18B20(pin, name)
-    {
-      idx = idxtmp;
-    }
-};
 // Defenition classe client web
 
 class WebClient : public HTTP::Client {
@@ -143,11 +115,11 @@ class WebClient : public HTTP::Client {
     int typeClient = UPDATE;
     int value = 0;
     int etat = -1;
-    int idx=0;
+    int idx = 0;
     virtual void on_response(const char* hostname, const char* path);
 };
-void
-WebClient::on_response(const char* hostname, const char* path)
+
+void WebClient::on_response(const char* hostname, const char* path)
 {
   uint32_t start = Watchdog::millis();
   uint32_t count = 0L;
@@ -204,6 +176,44 @@ WebClient::on_response(const char* hostname, const char* path)
   trace << PSTR("Total (byte): ") << count << endl;
   trace << PSTR("Time (ms): ") << Watchdog::millis() - start << endl;
 }
+
+
+// Definition classe button
+class PushButton : public Button {
+  public:
+    bool state;
+    int idx;
+    int hummanPin;
+    PushButton(Board::DigitalPin pin, Button::Mode mode, int idxtmp,int humman) :
+      Button(pin, mode),
+      state(false)
+    {
+
+      idx = idxtmp;
+      hummanPin = humman;
+    }
+    virtual void on_change(uint8_t type)
+    {
+      UNUSED(type);
+      state = !state;
+      executeButton(hummanPin, state);
+    }
+};
+
+class DS18B20E : public DS18B20 {
+  public :
+    int idx;
+    DS18B20E(OWI *pin, const char *name = NULL, int idxtmp = 0) :
+      DS18B20(pin, name)
+    {
+      idx = idxtmp;
+    }
+};
+
+
+// Definition du webserver
+WebServer server;
+
 // Definition du web client
 WebClient client;
 
@@ -234,12 +244,15 @@ void setup()
 
   // Start the server
   ASSERT(server.begin(ethernet.socket(Socket::TCP, PORT)));
+  trace << PSTR("End setup, Serve listening on ") << ip << PORT;
 
 }
 
 void loop()
 {
   // Service incoming requests
+  
+  trace << PSTR("Begin loop");
   Event event;
   if (Event::queue.available() > 0 ) Event::queue.await(&event); //Event::queue.await(&event);
   event.dispatch();
@@ -253,8 +266,9 @@ void loop()
     readSensors();
     requestDone == false;
   }
+  trace << PSTR("Begin run");
   server.run();
-
+trace << PSTR("End run");
 }
 
 void CmdExecute(int pin, int cmd ) {
@@ -277,22 +291,23 @@ void CmdExecute(int pin, int cmd ) {
 // Initialise pin change it to your configuration
 void initPin()
 {
-
+  PushButton buttonElec(digital_pin_map[22],Button::ON_FALLING_MODE,8,22);
 
 }
 void pinUp(int pin)
 {
-  OutputPin(digital_pin_map[pin], 1);
+  OutputPin((Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]), 1);
 }
 void pinDown(int pin)
 {
-  OutputPin(digital_pin_map[pin], 0);
+  OutputPin((Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]), 0);
 }
 void pinTelerupteur(int pin)
 {
-  OutputPin OPin = OutputPin(digital_pin_map[pin], 1);
+  trace << PSTR( "Pin Telerupteur Pin : ") << pin << PSTR(" digital pin map : ") << (Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]) << endl;
+  OutputPin OPin = OutputPin((Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]), 0);
   delay(500);
-  OPin.write(0);
+  OPin.write(1);
 }
 void executeButton(int pin, bool state)
 {
