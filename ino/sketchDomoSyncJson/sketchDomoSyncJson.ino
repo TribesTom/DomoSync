@@ -72,7 +72,7 @@ void
 WebServer::on_request(IOStream& page, char* method, char* path, char* query)
 {
 
-#if defined(DEBUG)
+#if defined(DEBUG1)
   trace << PSTR("Request Here : ") << path << query << endl ;
 #endif
   // Get client connection information; MAC, IP address and port
@@ -101,11 +101,11 @@ WebServer::on_request(IOStream& page, char* method, char* path, char* query)
   }
   long pin = String(pinChar).toInt();
   long cmd = String(pinCmd).toInt();
-#if defined(DEBUG)
+#if defined(DEBUG1)
   trace << PSTR("Request Execute : Pin :") << pin << PSTR("Cmd :")  << cmd << endl;
 #endif
   CmdExecute(pin, cmd);
-#if defined(DEBUG)
+#if defined(DEBUG1)
   trace << PSTR("Free memory : ") << free_memory() << endl;
 #endif
 
@@ -175,13 +175,13 @@ void WebClient::on_response(const char* hostname, const char* path)
 
         }
       }
-#if defined(DEBUG)
+#if defined(DEBUG1)
       trace << PSTR("Idx : ") << idx << PSTR(" Data : ") << value << endl;
 #endif
       break;
   }
   etat = 1;
-#if defined(DEBUG)
+#if defined(DEBUG1)
 
   trace << PSTR("Total (byte): ") << count << endl;
   trace << PSTR("Time (ms): ") << Watchdog::millis() - start << endl;
@@ -206,7 +206,7 @@ class PushButton : public Button {
     }
     virtual void on_change(uint8_t type)
     {
-#if defined(DEBUG)
+#if defined(DEBUG1)
       trace << PSTR("Button : on_change : hummanpin : ") << hummanPin << PSTR(" Internal Pin : ") << get_pin() << endl ;
 #endif
       UNUSED(type);
@@ -269,7 +269,7 @@ void setup()
 
   // Start the server
   ASSERT(server.begin(ethernet.socket(Socket::TCP, PORT)));
-#if defined(DEBUG)
+#if defined(DEBUG1)
   trace << PSTR("End setup, Serve listening on ") << ip << PORT;
 #endif
 }
@@ -278,7 +278,7 @@ void setup()
 void loop()
 {
   // Service incoming requests
-#if defined(DEBUG)
+#if defined(DEBUG1)
   trace << PSTR("Begin loop, Event queue size : ") << Event::queue.available() << endl;
 #endif
   
@@ -294,11 +294,11 @@ void loop()
     readSensors();
     requestDone == false;
   }
-#if defined(DEBUG)
+#if defined(DEBUG1)
   trace << PSTR("Begin run") << endl;
 #endif
   server.run(100);
-#if defined(DEBUG)
+#if defined(DEBUG1)
   trace << PSTR("End run") << endl;
 #endif
 }
@@ -350,7 +350,7 @@ void pinTelerupteurDown(int pin)
 }
 void pinTelerupteur(int pin)
 {
-#if defined(DEBUG)
+#if defined(DEBUG1)
   trace << PSTR( "Pin Telerupteur Pin : ") << pin << PSTR(" digital pin map : ") << (Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]) << endl;
 #endif
   OutputPin OPin = OutputPin((Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]), 0);
@@ -359,7 +359,7 @@ void pinTelerupteur(int pin)
 }
 void executeButton(int pin, bool state)
 {
-#if defined(DEBUG)
+#if defined(DEBUG1)
   trace << ("Buton:ExecuteButton: client begin ") << endl ;
 #endif
   client.begin(ethernet.socket(Socket::TCP));
@@ -367,7 +367,7 @@ void executeButton(int pin, bool state)
   switch (pin)
   {
     case 22:
-#if defined(DEBUG)
+#if defined(DEBUG1)
       trace << ("Buton: Case 22 : client get, state : ") << state << endl ;
 #endif
       if (state) client.get("http://192.168.1.101:8080/json.htm?type=command&param=switchlight&idx=8&switchcmd=On&level=0&passcode=");
