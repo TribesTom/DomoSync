@@ -126,7 +126,7 @@ void WebClient::on_response(const char* hostname, const char* path)
 {
   uint32_t start = Watchdog::millis();
   uint32_t count = 0L;
-  char buf[32] = {0};
+  char buf[96] = {0};
   char res;
   int i = 0;
   etat = 0 ;
@@ -140,7 +140,12 @@ void WebClient::on_response(const char* hostname, const char* path)
         {
           if ( String(buf).startsWith("\"status\""))
           {
-            if (buf[12] == 'O') value = 1;
+            if (buf[12] == 'O') {
+              value = 1;
+#if defined(DEBUG1)
+              trace << PSTR("Response Update = OK") << endl;
+#endif
+            }
 
           }
           for (int j = 0; j < 32; j++) buf[j] = 0;
@@ -151,28 +156,48 @@ void WebClient::on_response(const char* hostname, const char* path)
       break;
 
     case GETSTAT :
-
+#if defined(DEBUG1)
+              trace << PSTR("Response GETSTAT :") << endl;
+#endif
       while ((res = m_sock->getchar()) >= 0) {
         buf[i] = res;
+        i++;
+       // #if defined(DEBUG1)
+       // trace << res;
+      //  #endif
         if (res == '\n')
         {
-          if ( String(buf).startsWith("\"Data\""))
+          #if defined(DEBUG1)
+          int o=0;
+          while (buf[o] != '\n' ) { trace << o << PSTR(":") << buf[o] << PSTR("; ") ; o++ ; }
+          trace << endl ;
+          sleep (1);
+           #endif
+          if ( buf[10] == 'D' && buf[11] == 'a' && buf[12] == 't' && buf[13] == 'a' )
           {
-            if (buf[11] == 'n') value = 1;
-            if (buf[11] == 'f') value = 0;
+            if (buf[20] == 'n') value = 1;
+            else if (buf[20] == 'f') value = 0;
+            #if defined(DEBUG1)
+           trace << PSTR("DATA :") << value << endl;
+          #endif
           }
-          if ( String(buf).startsWith("\"Idx\""))
+          if ( buf[10] == 'i' && buf[11] == 'd' && buf[12] == 'x')
           {
             int j = 0;
             char idxChar[3];
-            while (buf[i + j] != 34) idxChar[j] = buf[i + j] ;
+            while (buf[18 + j] != 34 && j < 3) { idxChar[j] = buf[18 + j] ; j++; }
             idx = (int)String(idxChar).toInt();
+             #if defined(DEBUG1)
+           trace << PSTR("Idx :") << idx << endl;
+          #endif
           }
 
 
-          for (int j = 0; j < 32; j++) buf[j] = 0;
+          for (int j = 0; j < 96; j++) buf[j] = 0;
           i = 0;
-
+         // #if defined(DEBUG1)
+      //  trace << endl;
+      //  #endif
         }
       }
 #if defined(DEBUG1)
@@ -263,10 +288,10 @@ void setup()
 
   // Initialise pin type
 
-  initPin();
+  
 
   ASSERT(ethernet.begin(ip, subnet));
-
+  initPin();
   // Start the server
   ASSERT(server.begin(ethernet.socket(Socket::TCP, PORT)));
 #if defined(DEBUG1)
@@ -281,7 +306,7 @@ void loop()
 #if defined(DEBUG1)
   trace << PSTR("Begin loop, Event queue size : ") << Event::queue.available() << endl;
 #endif
-  
+
   if (Event::queue.available() > 0 ) Event::queue.await(&event); //Event::queue.await(&event);
   event.dispatch();
   uint32_t time_tmp = Watchdog::millis();
@@ -295,11 +320,11 @@ void loop()
     requestDone == false;
   }
 #if defined(DEBUG1)
-  trace << PSTR("Begin run") << endl;
+  trace << PSTR(".") ;
 #endif
-  server.run(100);
+  server.run(20);
 #if defined(DEBUG1)
-  trace << PSTR("End run") << endl;
+  trace << PSTR(";") ;
 #endif
 }
 
@@ -328,6 +353,26 @@ void initPin()
 {
 
   buttonElec.begin();
+#if defined(DEBUG1)
+  trace << ("Get Pin Info ") << endl ;
+#endif
+  client.begin(ethernet.socket(Socket::TCP));
+  client.typeClient = GETSTAT;
+
+#if defined(DEBUG1)
+  trace << ("Telerupteur Pins ") << endl ;
+#endif
+  client.get("http://192.168.1.101:8080/json.htm?type=devices&rid=7");
+  trace << PSTR("Client Value 24 :") << client.value << endl;
+  telerupteur[24] = client.value;
+  client.get("http://192.168.1.101:8080/json.htm?type=devices&rid=8");
+  trace << PSTR("Client Value 25 :") << client.value << endl;
+  telerupteur[25] = client.value;
+
+
+  client.end();
+  client.etat = -1;
+  sleep(5);
 
 }
 void pinUp(int pin)
