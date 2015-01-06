@@ -11,34 +11,11 @@
  BSD license, all text above must be included in any redistribution
  ****************************************************/
 
-#include <Wire.h>
-#ifdef __AVR__
-#include <avr/pgmspace.h>
-#endif
+#include "Cosa/TWI.hh"
+
 #include "Adafruit_MCP23017.h"
 
-#if ARDUINO >= 100
-#include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
 
-// minihelper to keep Arduino backward compatibility
-static inline void wiresend(uint8_t x) {
-#if ARDUINO >= 100
-	Wire.write((uint8_t) x);
-#else
-	Wire.send(x);
-#endif
-}
-
-static inline uint8_t wirerecv(void) {
-#if ARDUINO >= 100
-	return Wire.read();
-#else
-	return Wire.receive();
-#endif
-}
 
 /**
  * Bit number associated to a give Pin
@@ -59,11 +36,12 @@ uint8_t Adafruit_MCP23017::regForPin(uint8_t pin, uint8_t portAaddr, uint8_t por
  */
 uint8_t Adafruit_MCP23017::readRegister(uint8_t addr){
 	// read the current GPINTEN
-	Wire.beginTransmission(MCP23017_ADDRESS | i2caddr);
-	wiresend(addr);
-	Wire.endTransmission();
-	Wire.requestFrom(MCP23017_ADDRESS | i2caddr, 1);
-	return wirerecv();
+	uint8_t res;
+	twi.begin(this);
+	twi.write(addr);
+	twi.read_request(&res,sizeof(res)));
+	twi.end();
+	return res;
 }
 
 
@@ -72,10 +50,10 @@ uint8_t Adafruit_MCP23017::readRegister(uint8_t addr){
  */
 void Adafruit_MCP23017::writeRegister(uint8_t regAddr, uint8_t regValue){
 	// Write the register
-	Wire.beginTransmission(MCP23017_ADDRESS | i2caddr);
-	wiresend(regAddr);
-	wiresend(regValue);
-	Wire.endTransmission();
+	twi.begin(this);
+	twi.write(regAddr);
+	twi.write(regValue);
+	twi.end();
 }
 
 
@@ -106,8 +84,9 @@ void Adafruit_MCP23017::begin(uint8_t addr) {
 		addr = 7;
 	}
 	i2caddr = addr;
+	m_addr = addr;
 
-	Wire.begin();
+	twi.begin();
 
 	// set defaults!
 	// all inputs on port A and B
@@ -137,8 +116,8 @@ uint16_t Adafruit_MCP23017::readGPIOAB() {
 	uint8_t a;
 
 	// read the current GPIO output latches
-	Wire.beginTransmission(MCP23017_ADDRESS | i2caddr);
-	wiresend(MCP23017_GPIOA);
+	twi.begin(this);
+	twi.write(MCP23017_GPIOA);
 	Wire.endTransmission();
 
 	Wire.requestFrom(MCP23017_ADDRESS | i2caddr, 2);
