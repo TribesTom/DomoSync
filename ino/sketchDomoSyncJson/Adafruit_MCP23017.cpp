@@ -19,7 +19,7 @@
  */
  
 
-#include "Cosa/TWI.hh"
+//#include "Cosa/TWI.hh"
 
 #include "Adafruit_MCP23017.h"
 
@@ -47,7 +47,7 @@ uint8_t MCP23017::readRegister(uint8_t addr){
 	uint8_t res;
 	twi.begin(this);
 	twi.write(addr);
-	twi.read_request(&res,sizeof(res)));
+	twi.read_request(&res,sizeof(res));
 	twi.end();
 	return res;
 }
@@ -77,7 +77,7 @@ void MCP23017::updateRegisterBit(uint8_t pin, uint8_t pValue, uint8_t portAaddr,
 	regValue = readRegister(regAddr);
 
 	// set the value for the particular bit
-	bitWrite(regValue,bit,pValue);
+	bit_field_set(regValue,bit,pValue);
 
 	writeRegister(regAddr,regValue);
 }
@@ -100,7 +100,7 @@ void MCP23017::begin(uint8_t addr) {
 	// all inputs on port A and B
 	writeRegister(MCP23017_IODIRA,0xff);
 	writeRegister(MCP23017_IODIRB,0xff);
-	twi.end()
+	twi.end();
 }
 
 /**
@@ -126,10 +126,10 @@ uint16_t MCP23017::readGPIOAB() {
 
 	// read the current GPIO output latches
 	twi.begin(this);
-	twi.write(MCP23017_GPIOA);
+	twi.write((uint8_t)MCP23017_GPIOA);
 	
 
-	twi.requestFrom(&ba, sizeof(ba));
+	twi.read_request(&ba, sizeof(ba));
 	twi.end();
 
 	return ba;
@@ -146,9 +146,9 @@ uint8_t MCP23017::readGPIO(uint8_t b) {
 	
 	twi.begin(this);
 	if (b == 0)
-		twi.write(MCP23017_GPIOA);
+		twi.write((uint8_t)MCP23017_GPIOA);
 	else {
-		twi.write(MCP23017_GPIOB);
+		twi.write((uint8_t)MCP23017_GPIOB);
 	}
 	
 
@@ -160,8 +160,8 @@ uint8_t MCP23017::readGPIO(uint8_t b) {
  * Writes all the pins in one go. This method is very useful if you are implementing a multiplexed matrix and want to get a decent refresh rate.
  */
 void MCP23017::writeGPIOAB(uint16_t ba) {
-	twi.beginTransmission(this);
-	twi.write(MCP23017_GPIOA);
+	twi.begin(this);
+	twi.write((uint8_t)MCP23017_GPIOA);
 	twi.write(ba);
 	twi.end();
 }
@@ -176,7 +176,7 @@ void MCP23017::digitalWrite(uint8_t pin, uint8_t d) {
 	gpio = readRegister(regAddr);
 
 	// set the pin and direction
-	bitWrite(gpio,bit,d);
+	bit_field_set(gpio,bit,d);
 
 	// write the new GPIO
 	regAddr=regForPin(pin,MCP23017_GPIOA,MCP23017_GPIOB);
@@ -205,16 +205,16 @@ uint8_t MCP23017::digitalRead(uint8_t pin) {
 void MCP23017::setupInterrupts(uint8_t mirroring, uint8_t openDrain, uint8_t polarity){
 	// configure the port A
 	uint8_t ioconfValue=readRegister(MCP23017_IOCONA);
-	bitWrite(ioconfValue,6,mirroring);
-	bitWrite(ioconfValue,2,openDrain);
-	bitWrite(ioconfValue,1,polarity);
+	bit_field_set(ioconfValue,6,mirroring);
+	bit_field_set(ioconfValue,2,openDrain);
+	bit_field_set(ioconfValue,1,polarity);
 	writeRegister(MCP23017_IOCONA,ioconfValue);
 
 	// Configure the port B
 	ioconfValue=readRegister(MCP23017_IOCONB);
-	bitWrite(ioconfValue,6,mirroring);
-	bitWrite(ioconfValue,2,openDrain);
-	bitWrite(ioconfValue,1,polarity);
+	bit_field_set(ioconfValue,6,mirroring);
+	bit_field_set(ioconfValue,2,openDrain);
+	bit_field_set(ioconfValue,1,polarity);
 	writeRegister(MCP23017_IOCONB,ioconfValue);
 }
 
@@ -245,11 +245,11 @@ uint8_t MCP23017::getLastInterruptPin(){
 
 	// try port A
 	intf=readRegister(MCP23017_INTFA);
-	for(int i=0;i<8;i++) if (bitRead(intf,i)) return i;
+	for(int i=0;i<8;i++) if (bit_get(intf,i)) return i;
 
 	// try port B
 	intf=readRegister(MCP23017_INTFB);
-	for(int i=0;i<8;i++) if (bitRead(intf,i)) return i+8;
+	for(int i=0;i<8;i++) if (bit_get(intf,i)) return i+8;
 
 	return MCP23017_INT_ERR;
 
