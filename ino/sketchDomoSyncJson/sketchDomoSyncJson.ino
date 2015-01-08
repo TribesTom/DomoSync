@@ -268,6 +268,12 @@ bool requestDone = false;
 // Tableau état des telerupteurs
 
 bool telerupteur[100] = {false};
+
+// Extension I2C MCP23017
+
+MCP23017 mcp1(0);
+MCP23017 mcp2(1);
+
 Event event;
 
 
@@ -344,6 +350,12 @@ void CmdExecute(int pin, int cmd ) {
     case 4:
       pinTelerupteurDown(pin);
       break;
+    case 5:
+      pinMCPUp(pin);
+      break;
+    case 6:
+      pinMCPDown(pin);
+      break;
     default :
       break;
   }
@@ -374,6 +386,7 @@ void initPin()
   client.end();
   client.etat = -1;
   sleep(5);
+  mcp1.begin(0);
 
 }
 void pinUp(int pin)
@@ -402,6 +415,39 @@ void pinTelerupteur(int pin)
   OutputPin OPin = OutputPin((Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]), 0);
   delay(500);
   OPin.write(1);
+}
+void pinMCPUp(int pin)
+{
+  MCP23017 *mcp = NULL;
+  if (pin >= 0 && pin < 16)
+  {
+    mcp=&mcp1;
+  }
+  else if (pin >= 16 && pin < 32)
+  {
+    mcp=&mcp2;
+    pin = pin - 16;
+    }
+  else if( mcp == NULL ) return;
+  mcp->pinMode(pin,OUTPUT);
+  mcp->digitalWrite(pin,HIGH);
+  
+}
+void pinMCPDown(int pin)
+{
+  MCP23017 *mcp = NULL;
+  if (pin >= 0 && pin < 16)
+  {
+    mcp=&mcp1;
+  }
+  else if (pin >= 16 && pin < 32)
+  {
+    mcp=&mcp2;
+    pin = pin - 16;
+    }
+  else if( mcp == NULL ) return;
+  mcp->pinMode(pin,OUTPUT);
+  mcp->digitalWrite(pin,LOW);
 }
 void executeButton(int pin, bool state)
 {
