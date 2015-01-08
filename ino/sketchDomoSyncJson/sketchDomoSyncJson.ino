@@ -20,7 +20,7 @@
 #include "Cosa/OWI/Driver/DS18B20.hh"
 #include "Cosa/Driver/DHT.hh"
 #include "Cosa/Memory.h"
-#include "Adafruit_MCP23017.h"
+
 // EEPROM variable
 //#define DEBUG1
 #define USE_ETHERNET_SHIELD
