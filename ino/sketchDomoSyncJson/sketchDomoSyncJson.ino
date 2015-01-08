@@ -23,7 +23,7 @@
 #include "Adafruit_MCP23017.h"
 
 // EEPROM variable
-//#define DEBUG1
+#define DEBUG1
 #define USE_ETHERNET_SHIELD
 #if defined(USE_ETHERNET_SHIELD)
 OutputPin sd(Board::D4, 1);
@@ -310,7 +310,7 @@ void setup()
 void loop()
 {
   // Service incoming requests
-#if defined(DEBUG1)
+#if defined(DEBUG2)
   trace << PSTR("Begin loop, Event queue size : ") << Event::queue.available() << endl;
 #endif
 
@@ -326,11 +326,11 @@ void loop()
     readSensors();
     requestDone == false;
   }
-#if defined(DEBUG1)
+#if defined(DEBUG2)
   trace << PSTR(".") ;
 #endif
   server.run(20);
-#if defined(DEBUG1)
+#if defined(DEBUG2)
   trace << PSTR(";") ;
 #endif
 }
@@ -418,6 +418,9 @@ void pinTelerupteur(int pin)
 }
 void pinMCPUp(int pin)
 {
+  #if defined(DEBUG1)
+  trace << PSTR( "MCPUP : ") << pin << endl;
+#endif
   MCP23017 *mcp = NULL;
   if (pin >= 0 && pin < 16)
   {
@@ -435,6 +438,9 @@ void pinMCPUp(int pin)
 }
 void pinMCPDown(int pin)
 {
+   #if defined(DEBUG1)
+  trace << PSTR( "MCPDOWN : ") << pin << endl;
+#endif
   MCP23017 *mcp = NULL;
   if (pin >= 0 && pin < 16)
   {

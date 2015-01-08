@@ -49,7 +49,9 @@ uint8_t MCP23017::readRegister(uint8_t addr){
 	twi.write(addr);
 	twi.read_request(&res,sizeof(res));
 	twi.end();
+        lastRead = res;
 	return res;
+
 }
 
 
@@ -61,6 +63,7 @@ void MCP23017::writeRegister(uint8_t regAddr, uint8_t regValue){
 	twi.begin(this);
 	twi.write(regAddr);
 	twi.write(regValue);
+        lastWrite = regAddr;
 	twi.end();
 }
 
@@ -94,13 +97,12 @@ void MCP23017::begin(uint8_t addr) {
 	i2caddr = addr;
 	m_addr = addr;
 
-	twi.begin(this);
-
+	
 	// set defaults!
 	// all inputs on port A and B
 	writeRegister(MCP23017_IODIRA,0xff);
 	writeRegister(MCP23017_IODIRB,0xff);
-	twi.end();
+	
 }
 
 /**
@@ -131,7 +133,7 @@ uint16_t MCP23017::readGPIOAB() {
 
 	twi.read_request(&ba, sizeof(ba));
 	twi.end();
-
+        lastRead= ba;
 	return ba;
 }
 
@@ -146,13 +148,18 @@ uint8_t MCP23017::readGPIO(uint8_t b) {
 	
 	twi.begin(this);
 	if (b == 0)
+              {
 		twi.write((uint8_t)MCP23017_GPIOA);
+                lastWrite = (uint8_t)MCP23017_GPIOA;
+              }
 	else {
 		twi.write((uint8_t)MCP23017_GPIOB);
+                lastWrite = (uint8_t)MCP23017_GPIOB;
 	}
 	
 
 	twi.read_request(&res,sizeof(res));
+        lastRead = res;
 	return res;
 }
 

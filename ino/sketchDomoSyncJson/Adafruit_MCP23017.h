@@ -93,7 +93,8 @@ protected:
 
 private:
   uint8_t i2caddr;
-
+  uint8_t lastRead;
+  uint8_t lastWrite;
   uint8_t bitForPin(uint8_t pin);
   uint8_t regForPin(uint8_t pin, uint8_t portAaddr, uint8_t portBaddr);
 
