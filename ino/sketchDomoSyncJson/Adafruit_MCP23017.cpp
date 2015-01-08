@@ -77,7 +77,7 @@ void MCP23017::updateRegisterBit(uint8_t pin, uint8_t pValue, uint8_t portAaddr,
 	regValue = readRegister(regAddr);
 
 	// set the value for the particular bit
-	bit_field_set(regValue,bit,pValue);
+	bit_write(pValue,regValue,bit);
 
 	writeRegister(regAddr,regValue);
 }
@@ -176,7 +176,7 @@ void MCP23017::digitalWrite(uint8_t pin, uint8_t d) {
 	gpio = readRegister(regAddr);
 
 	// set the pin and direction
-	bit_field_set(gpio,bit,d);
+	bit_write(d,gpio,bit);
 
 	// write the new GPIO
 	regAddr=regForPin(pin,MCP23017_GPIOA,MCP23017_GPIOB);
@@ -205,16 +205,16 @@ uint8_t MCP23017::digitalRead(uint8_t pin) {
 void MCP23017::setupInterrupts(uint8_t mirroring, uint8_t openDrain, uint8_t polarity){
 	// configure the port A
 	uint8_t ioconfValue=readRegister(MCP23017_IOCONA);
-	bit_field_set(ioconfValue,6,mirroring);
-	bit_field_set(ioconfValue,2,openDrain);
-	bit_field_set(ioconfValue,1,polarity);
+	bit_write(mirroring,ioconfValue,6);
+	bit_write(openDrain,ioconfValue,2);
+	bit_write(polarity,ioconfValue,1);
 	writeRegister(MCP23017_IOCONA,ioconfValue);
 
 	// Configure the port B
 	ioconfValue=readRegister(MCP23017_IOCONB);
-	bit_field_set(ioconfValue,6,mirroring);
-	bit_field_set(ioconfValue,2,openDrain);
-	bit_field_set(ioconfValue,1,polarity);
+	bit_write(mirroring,ioconfValue,6);
+	bit_write(openDrain,ioconfValue,2);
+	bit_write(polarity,ioconfValue,1);
 	writeRegister(MCP23017_IOCONB,ioconfValue);
 }
 
