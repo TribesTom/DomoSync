@@ -386,7 +386,7 @@ void initPin()
   client.end();
   client.etat = -1;
   sleep(5);
-  mcp1.begin(0);
+  mcp1.begin();
 
 }
 void pinUp(int pin)

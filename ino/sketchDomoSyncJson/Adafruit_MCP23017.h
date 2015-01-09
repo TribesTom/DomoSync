@@ -10,9 +10,11 @@
   Written by Limor Fried/Ladyada for Adafruit Industries.  
   BSD license, all text above must be included in any redistribution
  ****************************************************/
-#include "Cosa/TWI.hh"
+
 #ifndef _Adafruit_MCP23017_H_
 #define _Adafruit_MCP23017_H_
+
+#include "Cosa/TWI.hh"
 
 #define MCP23017_ADDRESS 0x20
 
@@ -54,14 +56,13 @@
 
 #define HIGH 1
 #define LOW 0
-// Don't forget the Wire library
+
+
 class MCP23017 : private TWI::Driver {
 public:
   MCP23017(uint8_t addr) :
-  TWI::Driver(MCP23017_ADDRESS| (addr & 0x7)),
-  i2caddr(MCP23017_ADDRESS | (addr & 0x7))
+  TWI::Driver(MCP23017_ADDRESS| (addr & 0x7))
   {}
-  void begin(uint8_t addr);
   void begin();
   void pinMode(uint8_t p, uint8_t d);
   void digitalWrite(uint8_t p, uint8_t d);
@@ -87,14 +88,10 @@ protected:
 * @param[in] subaddr device sub address.
 */
   MCP23017(uint8_t addr, uint8_t subaddr) :
-  TWI::Driver(addr | (subaddr & 0x7)),
-  i2caddr(addr | (subaddr & 0x7))
+  TWI::Driver(addr | (subaddr & 0x7))
   {}
 
 private:
-  uint8_t i2caddr;
-  uint8_t lastRead;
-  uint8_t lastWrite;
   uint8_t bitForPin(uint8_t pin);
   uint8_t regForPin(uint8_t pin, uint8_t portAaddr, uint8_t portBaddr);
 

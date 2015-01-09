@@ -47,10 +47,9 @@ uint8_t MCP23017::readRegister(uint8_t addr){
 	uint8_t res;
 	twi.begin(this);
 	twi.write(addr);
-	twi.read_request(&res,sizeof(res));
+	twi.read(&res,sizeof(res));
 	twi.end();
-        lastRead = res;
-	return res;
+        return res;
 
 }
 
@@ -63,8 +62,7 @@ void MCP23017::writeRegister(uint8_t regAddr, uint8_t regValue){
 	twi.begin(this);
 	twi.write(regAddr);
 	twi.write(regValue);
-        lastWrite = regAddr;
-	twi.end();
+        twi.end();
 }
 
 
@@ -90,26 +88,12 @@ void MCP23017::updateRegisterBit(uint8_t pin, uint8_t pValue, uint8_t portAaddr,
 /**
  * Initializes the MCP23017 given its HW selected address, see datasheet for Address selection.
  */
-void MCP23017::begin(uint8_t addr) {
-	if (addr > 7) {
-		addr = 7;
-	}
-	i2caddr = addr;
-	m_addr = addr;
-
-	
+void MCP23017::begin() {
 	// set defaults!
 	// all inputs on port A and B
 	writeRegister(MCP23017_IODIRA,0xff);
 	writeRegister(MCP23017_IODIRB,0xff);
 	
-}
-
-/**
- * Initializes the default MCP23017, with 000 for the configurable part of the address
- */
-void MCP23017::begin(void) {
-	begin(0);
 }
 
 /**
@@ -131,9 +115,9 @@ uint16_t MCP23017::readGPIOAB() {
 	twi.write((uint8_t)MCP23017_GPIOA);
 	
 
-	twi.read_request(&ba, sizeof(ba));
+	twi.read(&ba, sizeof(ba));
 	twi.end();
-        lastRead= ba;
+        
 	return ba;
 }
 
@@ -149,17 +133,15 @@ uint8_t MCP23017::readGPIO(uint8_t b) {
 	twi.begin(this);
 	if (b == 0)
               {
-		twi.write((uint8_t)MCP23017_GPIOA);
-                lastWrite = (uint8_t)MCP23017_GPIOA;
+		twi.write((uint8_t)MCP23017_GPIOA);                
               }
 	else {
-		twi.write((uint8_t)MCP23017_GPIOB);
-                lastWrite = (uint8_t)MCP23017_GPIOB;
+		twi.write((uint8_t)MCP23017_GPIOB);                
 	}
 	
 
-	twi.read_request(&res,sizeof(res));
-        lastRead = res;
+	twi.read(&res,sizeof(res));
+        
 	return res;
 }
 
