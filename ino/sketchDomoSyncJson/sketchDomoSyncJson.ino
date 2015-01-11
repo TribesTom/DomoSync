@@ -419,12 +419,13 @@ void pinTelerupteur(int pin)
 void pinMCPUp(int pin)
 {
   #if defined(DEBUG1)
-  trace << PSTR( "MCPUP : ") << pin << endl;
+  trace << PSTR( "MCPUP : ") << pin <<  endl;
 #endif
   MCP23017 *mcp = NULL;
   if (pin >= 0 && pin < 16)
   {
     mcp=&mcp1;
+    trace << PSTR( "MCP1 doing : ") << PSTR( "MCP GPIO Val : ") << mcp->readGPIOAB() << endl;
   }
   else if (pin >= 16 && pin < 32)
   {
@@ -434,6 +435,7 @@ void pinMCPUp(int pin)
   else if( mcp == NULL ) return;
   mcp->pinMode(pin,OUTPUT);
   mcp->digitalWrite(pin,HIGH);
+  trace << PSTR( "MCP GPIO Val : ") << mcp->readGPIOAB() << endl;
   
 }
 void pinMCPDown(int pin)

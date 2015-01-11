@@ -17,11 +17,103 @@
  
  
  */
+#include "Cosa/TWI.hh"
+#include "Cosa/Watchdog.hh"
+#include "Cosa/RTC.hh"
+#include "Cosa/OutputPin.hh"
+#include "Cosa/Trace.hh"
+#include "Cosa/IOStream/Driver/UART.hh"
+#include "Cosa/Memory.h"
+#define MCP23017_ADDRESS 0x20
+
+// registers
+#define MCP23017_IODIRA 0x00
+#define MCP23017_IPOLA 0x02
+#define MCP23017_GPINTENA 0x04
+#define MCP23017_DEFVALA 0x06
+#define MCP23017_INTCONA 0x08
+#define MCP23017_IOCONA 0x0A
+#define MCP23017_GPPUA 0x0C
+#define MCP23017_INTFA 0x0E
+#define MCP23017_INTCAPA 0x10
+#define MCP23017_GPIOA 0x12
+#define MCP23017_OLATA 0x14
+
+
+#define MCP23017_IODIRB 0x01
+#define MCP23017_IPOLB 0x03
+#define MCP23017_GPINTENB 0x05
+#define MCP23017_DEFVALB 0x07
+#define MCP23017_INTCONB 0x09
+#define MCP23017_IOCONB 0x0B
+#define MCP23017_GPPUB 0x0D
+#define MCP23017_INTFB 0x0F
+#define MCP23017_INTCAPB 0x11
+#define MCP23017_GPIOB 0x13
+#define MCP23017_OLATB 0x15
+
+#define MCP23017_INT_ERR 255
+
+#define INPUT 1
+#define OUTPUT 0
+
+#define CHANGE 0
+
+#define FALLING 1
+#define RISING 0
+
+#define HIGH 1
+#define LOW 0
+
+
+class MCP23017 : private TWI::Driver {
+public:
+  MCP23017(uint8_t addr) :
+  TWI::Driver(MCP23017_ADDRESS| (addr & 0x7))
+  {}
+  void begin();
+  void pinMode(uint8_t p, uint8_t d);
+  void digitalWrite(uint8_t p, uint8_t d);
+  void pullUp(uint8_t p, uint8_t d);
+  uint8_t digitalRead(uint8_t p);
+
+  void writeGPIOAB(uint16_t);
+  uint16_t readGPIOAB();
+  uint8_t readGPIO(uint8_t b);
+
+  void setupInterrupts(uint8_t mirroring, uint8_t open, uint8_t polarity);
+  void setupInterruptPin(uint8_t p, uint8_t mode);
+  uint8_t getLastInterruptPin();
+  uint8_t getLastInterruptPinValue();
+
+protected:
+/** Pin number mask. */
+  static const uint8_t PIN_MASK = 0x07;
+
+/* Construct connection to MCP23017 Remote 16-bit I/O expander with
+* given address.
+* @param[in] addr bus address.
+* @param[in] subaddr device sub address.
+*/
+  MCP23017(uint8_t addr, uint8_t subaddr) :
+  TWI::Driver(addr | (subaddr & 0x7))
+  {}
+
+private:
+  uint8_t bitForPin(uint8_t pin);
+  uint8_t regForPin(uint8_t pin, uint8_t portAaddr, uint8_t portBaddr);
+
+  uint8_t readRegister(uint8_t addr);
+  void writeRegister(uint8_t addr, uint8_t value);
+
+  /**
+   * Utility private method to update a register associated with a pin (whether port A/B)
+   * reads its value, updates the particular bit, and writes its value.
+   */
+  void updateRegisterBit(uint8_t p, uint8_t pValue, uint8_t portAaddr, uint8_t portBaddr);
+
+};
  
-
-//#include "Cosa/TWI.hh"
-
-#include "Adafruit_MCP23017.h"
 
 
 
@@ -49,6 +141,7 @@ uint8_t MCP23017::readRegister(uint8_t addr){
 	twi.write(addr);
 	twi.read(&res,sizeof(res));
 	twi.end();
+        trace << PSTR("ReadRegister addr : ") << addr << PSTR(" ReadRegister Res value : ") << res << endl;
         return res;
 
 }
@@ -62,6 +155,7 @@ void MCP23017::writeRegister(uint8_t regAddr, uint8_t regValue){
 	twi.begin(this);
 	twi.write(regAddr,&regValue,sizeof(regAddr));
         twi.end();
+        trace << PSTR("WriteRegister regAddr : ") << regAddr << PSTR(" WriteRegister reg value : ") << regValue << endl;
 }
 
 
@@ -90,11 +184,14 @@ void MCP23017::updateRegisterBit(uint8_t pin, uint8_t pValue, uint8_t portAaddr,
 void MCP23017::begin() {
 	// set defaults!
 	// all inputs on port A and B
+        readRegister(MCP23017_IODIRA);
+        readRegister(MCP23017_IODIRB);
 	writeRegister(MCP23017_IODIRA,0xff);
 	writeRegister(MCP23017_IODIRB,0xff);
-        writeRegister(MCP23017_GPIOA,0x00);
-        writeRegister(MCP23017_GPIOB,0x00);
-        
+        readRegister(MCP23017_IODIRA);
+        readRegister(MCP23017_IODIRB);
+        readRegister(MCP23017_IOCONA);
+        readRegister(MCP23017_IOCONB);
 	
 }
 
@@ -163,7 +260,8 @@ void MCP23017::digitalWrite(uint8_t pin, uint8_t d) {
 
 	// read the current GPIO output latches
 	uint8_t regAddr=regForPin(pin,MCP23017_OLATA,MCP23017_OLATB);
-	gpio = readRegister(regAddr);
+	//uint8_t regAddr=regForPin(pin,MCP23017_GPIOA,MCP23017_GPIOB);
+        gpio = readRegister(regAddr);
 
 	// set the pin and direction
 	bit_write(d,gpio,bit);
@@ -254,5 +352,67 @@ uint8_t MCP23017::getLastInterruptPinValue(){
 
 	return MCP23017_INT_ERR;
 }
+MCP23017 mcp(0);
+void setup() {
+  // put your setup code here, to run once:
+  uart.begin(9600);
+  trace.begin(&uart, PSTR("CosaPinWebServer: started"));
+  //Watchdog::begin();
+  Watchdog::begin(16, Watchdog::push_timeout_events);
+ trace << PSTR("Begin Output : ") << endl;
+ mcp.begin();
+ mcp.pinMode(8,OUTPUT);
+ mcp.pinMode(9,OUTPUT);
+ mcp.pinMode(10,OUTPUT);
+ mcp.pinMode(11,OUTPUT);
+ mcp.pinMode(12,OUTPUT);
+ mcp.pinMode(13,OUTPUT);
+ mcp.pinMode(14,OUTPUT);
+ mcp.pinMode(15,OUTPUT);
+ trace << PSTR("End Output : ") << endl;
+      
+}
 
-
+void loop() {
+  // put your main code here, to run repeatedly:
+  trace << PSTR("Out 8 : ") << endl;
+  mcp.digitalWrite(8,1);
+  sleep(5);
+  mcp.digitalWrite(8,0);
+  sleep(5);
+  trace << PSTR("Out 9 : ") << endl;
+  mcp.digitalWrite(9,1);
+  sleep(5);
+  mcp.digitalWrite(9,0);
+  sleep(5);
+  trace << PSTR("Out 10 : ") << endl;
+  mcp.digitalWrite(10,1);
+  sleep(5);
+  mcp.digitalWrite(10,0);
+  sleep(5);
+  trace << PSTR("Out 11 : ") << endl;
+  mcp.digitalWrite(11,1);
+  sleep(5);
+  mcp.digitalWrite(11,0);
+  sleep(5);
+  trace << PSTR("Out 12 : ") << endl;
+  mcp.digitalWrite(12,1);
+  sleep(5);
+  mcp.digitalWrite(12,0);
+  sleep(5);
+  trace << PSTR("Out 13 : ") << endl;
+  mcp.digitalWrite(13,1);
+  sleep(5);
+  mcp.digitalWrite(13,0);
+  sleep(5);
+  trace << PSTR("Out 14 : ") << endl;
+  mcp.digitalWrite(14,1);
+  sleep(5);
+  mcp.digitalWrite(14,0);
+  sleep(5);
+  trace << PSTR("Out 15 : ") << endl;
+  mcp.digitalWrite(15,1);
+  sleep(5);
+  mcp.digitalWrite(15,0);
+  sleep(5);
+}
