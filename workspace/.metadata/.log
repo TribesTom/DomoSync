@@ -119,3 +119,172 @@ Command-line arguments:  -os win32 -ws win32 -arch x86 -product com.ti.ccstudio.
 !ENTRY com.ti.ccstudio.debug 1 0 2015-01-11 22:56:04.022
 !MESSAGE DS_ERROR: CORTEX_M4_0: GEL: File: I:/Documents\GitHub\DomoSync\workspace\freertos_demo\Debug\freertos_demo.out Load cancelled by user.
 
+!SESSION 2015-01-12 11:07:50.331 -----------------------------------------------
+eclipse.buildId=M20120914-1540
+java.version=1.6.0_13
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=fr_BE
+Framework arguments:  -product com.ti.ccstudio.branding.product
+Command-line arguments:  -os win32 -ws win32 -arch x86 -product com.ti.ccstudio.branding.product
+
+!ENTRY org.eclipse.ui 2 0 2015-01-12 11:08:25.617
+!MESSAGE Warnings while parsing the viewer contributions from the 'org.eclipse.ui.popupMenus' extension point
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 11:08:25.617
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.CEditorRulerActions/org.eclipse.cdt.debug.internal.ui.actions.CBreakpointPropertiesRulerActionDelegate'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 11:08:25.617
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.CEditorRulerActions/org.eclipse.cdt.debug.internal.ui.actions.EnableDisableBreakpointRulerActionDelegate'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 11:08:25.617
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.CEditorRulerActions/org.eclipse.cdt.debug.ui.actions.RulerCreateBreakpointInteractiveAction'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 11:08:25.617
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.AsmEditorRulerActions/org.eclipse.cdt.debug.internal.ui.actions.asm.CBreakpointPropertiesRulerActionDelegate'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 11:08:25.617
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.AsmEditorRulerActions/org.eclipse.cdt.debug.internal.ui.actions.asm.EnableDisableBreakpointRulerActionDelegate'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 11:08:25.617
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.AsmEditorRulerActions/org.eclipse.cdt.debug.ui.actions.asm.RulerCreateBreakpointInteractiveAction'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 11:08:25.617
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.dsf.ui', id='AUTOGEN:::org.eclipse.cdt.dsf.debug.ui.disassemblyRulerActions/org.eclipse.debug.ui.actions.RulerAddBreakpointAction'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 11:08:25.617
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.dsf.ui', id='org.eclipse.cdt.dsf.debug.ui.disassembly.commands.rulerToggleBreakpoint'
+
+!ENTRY org.eclipse.osgi 2 1 2015-01-12 11:18:52.113
+!MESSAGE NLS unused message: Checking in: com.ti.ccstudio.project.ui.internal.messages
+
+!ENTRY org.eclipse.cdt.core 1 0 2015-01-12 11:23:43.175
+!MESSAGE Indexed 'freertos_demo' (15 sources, 46 headers) in 1,26 sec: 2.167 declarations; 11.410 references; 0 unresolved inclusions; 0 syntax errors; 17 unresolved names (0,13 %)
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:26:09.255
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:26:09.255
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:09.255
+!MESSAGE Software being installed: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:09.255
+!MESSAGE Missing requirement: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7) requires 'com.ti.ccstudio.installer.win32.feature.group 6.0.0' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:26:09.330
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:26:09.330
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:09.330
+!MESSAGE Software being installed: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:09.330
+!MESSAGE Missing requirement: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7) requires 'com.ti.ccstudio.installer.win32.feature.group 6.0.0' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:26:09.764
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:26:09.764
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:09.764
+!MESSAGE Software being installed: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:09.764
+!MESSAGE Missing requirement: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7) requires 'com.ti.ccstudio.installer.win32.feature.group 6.0.0' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:26:09.768
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:26:09.768
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:09.768
+!MESSAGE Software being installed: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:09.768
+!MESSAGE Missing requirement: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7) requires 'com.ti.ccstudio.installer.win32.feature.group 6.0.0' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:26:34.036
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:26:34.036
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:34.036
+!MESSAGE Software being installed: Hercules Emulation 6.0.6 (com.ti.ccstudio.hercules.win32.feature.group 6.0.6)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:34.036
+!MESSAGE Missing requirement: Hercules Emulation 6.0.6 (com.ti.ccstudio.hercules.win32.feature.group 6.0.6) requires 'com.ti.dsflash.win32.feature.group 6.0.0.766' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:26:34.040
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:26:34.040
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:34.040
+!MESSAGE Software being installed: Hercules Emulation 6.0.6 (com.ti.ccstudio.hercules.win32.feature.group 6.0.6)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:34.040
+!MESSAGE Missing requirement: Hercules Emulation 6.0.6 (com.ti.ccstudio.hercules.win32.feature.group 6.0.6) requires 'com.ti.dsflash.win32.feature.group 6.0.0.766' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:26:59.024
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:26:59.024
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:59.024
+!MESSAGE Software being installed: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:59.024
+!MESSAGE Missing requirement: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7) requires 'com.ti.ccstudio.installer.win32.feature.group 6.0.0' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:26:59.027
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:26:59.027
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:59.027
+!MESSAGE Software being installed: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:26:59.027
+!MESSAGE Missing requirement: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7) requires 'com.ti.ccstudio.installer.win32.feature.group 6.0.0' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:27:11.118
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:27:11.118
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:27:11.118
+!MESSAGE Software being installed: Hercules Emulation 6.0.6 (com.ti.ccstudio.hercules.win32.feature.group 6.0.6)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:27:11.118
+!MESSAGE Missing requirement: Hercules Emulation 6.0.6 (com.ti.ccstudio.hercules.win32.feature.group 6.0.6) requires 'com.ti.dsflash.win32.feature.group 6.0.0.766' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:27:11.121
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:27:11.121
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:27:11.121
+!MESSAGE Software being installed: Hercules Emulation 6.0.6 (com.ti.ccstudio.hercules.win32.feature.group 6.0.6)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:27:11.121
+!MESSAGE Missing requirement: Hercules Emulation 6.0.6 (com.ti.ccstudio.hercules.win32.feature.group 6.0.6) requires 'com.ti.dsflash.win32.feature.group 6.0.0.766' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:27:32.410
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:27:32.410
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:27:32.410
+!MESSAGE Software being installed: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:27:32.410
+!MESSAGE Missing requirement: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7) requires 'com.ti.ccstudio.installer.win32.feature.group 6.0.0' but it could not be found
+
+!ENTRY org.eclipse.equinox.p2.operations 4 0 2015-01-12 11:27:32.414
+!MESSAGE Operation details
+!SUBENTRY 1 org.eclipse.equinox.p2.director 4 1 2015-01-12 11:27:32.414
+!MESSAGE Cannot complete the install because one or more required items could not be found.
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:27:32.414
+!MESSAGE Software being installed: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7)
+!SUBENTRY 2 org.eclipse.equinox.p2.director 4 0 2015-01-12 11:27:32.414
+!MESSAGE Missing requirement: MSP430 Emulators 6.0.1.7 (com.ti.ccstudio.msp430.emu.win32.feature.group 6.0.1.7) requires 'com.ti.ccstudio.installer.win32.feature.group 6.0.0' but it could not be found
+!SESSION 2015-01-12 12:04:04.804 -----------------------------------------------
+eclipse.buildId=M20120914-1540
+java.version=1.6.0_13
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=fr_BE
+Framework arguments:  -product com.ti.ccstudio.branding.product
+Command-line arguments:  -os win32 -ws win32 -arch x86 -product com.ti.ccstudio.branding.product
+
+!ENTRY org.eclipse.ui 2 0 2015-01-12 12:04:22.534
+!MESSAGE Warnings while parsing the viewer contributions from the 'org.eclipse.ui.popupMenus' extension point
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 12:04:22.534
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.CEditorRulerActions/org.eclipse.cdt.debug.internal.ui.actions.CBreakpointPropertiesRulerActionDelegate'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 12:04:22.534
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.CEditorRulerActions/org.eclipse.cdt.debug.internal.ui.actions.EnableDisableBreakpointRulerActionDelegate'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 12:04:22.534
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.CEditorRulerActions/org.eclipse.cdt.debug.ui.actions.RulerCreateBreakpointInteractiveAction'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 12:04:22.534
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.AsmEditorRulerActions/org.eclipse.cdt.debug.internal.ui.actions.asm.CBreakpointPropertiesRulerActionDelegate'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 12:04:22.534
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.AsmEditorRulerActions/org.eclipse.cdt.debug.internal.ui.actions.asm.EnableDisableBreakpointRulerActionDelegate'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 12:04:22.534
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.debug.ui', id='AUTOGEN:::org.eclipse.cdt.debug.ui.AsmEditorRulerActions/org.eclipse.cdt.debug.ui.actions.asm.RulerCreateBreakpointInteractiveAction'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 12:04:22.534
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.dsf.ui', id='AUTOGEN:::org.eclipse.cdt.dsf.debug.ui.disassemblyRulerActions/org.eclipse.debug.ui.actions.RulerAddBreakpointAction'
+!SUBENTRY 1 org.eclipse.ui 2 0 2015-01-12 12:04:22.534
+!MESSAGE invalid keybinding: Cannot bind to an incomplete key sequence: plug-in='org.eclipse.cdt.dsf.ui', id='org.eclipse.cdt.dsf.debug.ui.disassembly.commands.rulerToggleBreakpoint'
+
+!ENTRY org.eclipse.osgi 2 1 2015-01-12 12:06:15.346
+!MESSAGE NLS unused message: Checking in: com.ti.ccstudio.project.ui.internal.messages

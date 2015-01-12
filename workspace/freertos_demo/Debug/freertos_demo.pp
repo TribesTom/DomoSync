@@ -21,7 +21,7 @@ freertos_demo.obj: ../switch_task.h
 freertos_demo.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/FreeRTOS.h
 freertos_demo.obj: C:/ti/ccsv5/tools/compiler/arm_5.0.4/include/stddef.h
 freertos_demo.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/projdefs.h
-freertos_demo.obj: I:/Documents/GitHub/DomoSync/workspace/freertos_demo/FreeRTOSConfig.h
+freertos_demo.obj: E:/DomoSync/workspace/freertos_demo/FreeRTOSConfig.h
 freertos_demo.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/portable.h
 freertos_demo.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/portable/CCS/ARM_CM4F/portmacro.h
 freertos_demo.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/mpu_wrappers.h
@@ -51,7 +51,7 @@ C:/ti/ccsv5/tools/compiler/arm_5.0.4/include/stdarg.h:
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/FreeRTOS.h: 
 C:/ti/ccsv5/tools/compiler/arm_5.0.4/include/stddef.h: 
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/projdefs.h: 
-I:/Documents/GitHub/DomoSync/workspace/freertos_demo/FreeRTOSConfig.h: 
+E:/DomoSync/workspace/freertos_demo/FreeRTOSConfig.h: 
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/portable.h: 
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/portable/CCS/ARM_CM4F/portmacro.h: 
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/mpu_wrappers.h: 

@@ -20,7 +20,7 @@ led_task.obj: ../priorities.h
 led_task.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/FreeRTOS.h
 led_task.obj: C:/ti/ccsv5/tools/compiler/arm_5.0.4/include/stddef.h
 led_task.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/projdefs.h
-led_task.obj: I:/Documents/GitHub/DomoSync/workspace/freertos_demo/FreeRTOSConfig.h
+led_task.obj: E:/DomoSync/workspace/freertos_demo/FreeRTOSConfig.h
 led_task.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/portable.h
 led_task.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/portable/CCS/ARM_CM4F/portmacro.h
 led_task.obj: C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/mpu_wrappers.h
@@ -49,7 +49,7 @@ C:/ti/ccsv5/tools/compiler/arm_5.0.4/include/stdarg.h:
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/FreeRTOS.h: 
 C:/ti/ccsv5/tools/compiler/arm_5.0.4/include/stddef.h: 
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/projdefs.h: 
-I:/Documents/GitHub/DomoSync/workspace/freertos_demo/FreeRTOSConfig.h: 
+E:/DomoSync/workspace/freertos_demo/FreeRTOSConfig.h: 
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/portable.h: 
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/portable/CCS/ARM_CM4F/portmacro.h: 
 C:/ti/TivaWare_C_Series-2.1.0.12573/third_party/FreeRTOS/Source/include/mpu_wrappers.h: 

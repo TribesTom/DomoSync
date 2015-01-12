@@ -20,7 +20,7 @@
 #include "Cosa/OWI/Driver/DS18B20.hh"
 #include "Cosa/Driver/DHT.hh"
 #include "Cosa/Memory.h"
-#include "Adafruit_MCP23017.h"
+#include "MCP23017.h"
 
 // EEPROM variable
 #define DEBUG1
@@ -313,9 +313,10 @@ void loop()
 #if defined(DEBUG2)
   trace << PSTR("Begin loop, Event queue size : ") << Event::queue.available() << endl;
 #endif
-
-  if (Event::queue.available() > 0 ) Event::queue.await(&event); //Event::queue.await(&event);
-  event.dispatch();
+  while (Event::queue.dequeue( &event ))
+    event.dispatch();
+  //if (Event::queue.available() > 0 ) Event::queue.await(&event); //Event::queue.await(&event);
+ // event.dispatch();
   uint32_t time_tmp = Watchdog::millis();
   if (time_tmp - time > 5 * 60 * 1000 ) {
     sensorsConvert();
