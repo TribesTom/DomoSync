@@ -35,6 +35,9 @@ OutputPin sd(Board::D4, 1);
 #define IPREMOTE 192,168,1,101
 #define PORT 8888
 
+// Sensor activation
+//#define SENSOR_ON
+
 // Client web type
 
 #define UPDATE 0
@@ -158,47 +161,50 @@ void WebClient::on_response(const char* hostname, const char* path)
 
     case GETSTAT :
 #if defined(DEBUG1)
-              trace << PSTR("Response GETSTAT :") << endl;
+      trace << PSTR("Response GETSTAT :") << endl;
 #endif
       while ((res = m_sock->getchar()) >= 0) {
         buf[i] = res;
         i++;
-       // #if defined(DEBUG1)
-       // trace << res;
-      //  #endif
+        // #if defined(DEBUG1)
+        // trace << res;
+        //  #endif
         if (res == '\n')
         {
-          #if defined(DEBUG1)
-          int o=0;
-          while (buf[o] != '\n' ) { trace << o << PSTR(":") << buf[o] << PSTR("; ") ; o++ ; }
+#if defined(DEBUG1)
+          int o = 0;
+          while (buf[o] != '\n' ) {
+            trace << o << PSTR(":") << buf[o] << PSTR("; ") ;
+            o++ ;
+          }
           trace << endl ;
           sleep (1);
-           #endif
+#endif
           if ( buf[10] == 'D' && buf[11] == 'a' && buf[12] == 't' && buf[13] == 'a' )
           {
             if (buf[20] == 'n') value = 1;
             else if (buf[20] == 'f') value = 0;
-            #if defined(DEBUG1)
-           trace << PSTR("DATA :") << value << endl;
-          #endif
+#if defined(DEBUG1)
+            trace << PSTR("DATA :") << value << endl;
+#endif
           }
           if ( buf[10] == 'i' && buf[11] == 'd' && buf[12] == 'x')
           {
             int j = 0;
             char idxChar[3];
-            while (buf[18 + j] != 34 && j < 3) { idxChar[j] = buf[18 + j] ; j++; }
+            while (buf[18 + j] != 34 && j < 3) {
+              idxChar[j] = buf[18 + j] ;
+              j++;
+            }
             idx = (int)String(idxChar).toInt();
-             #if defined(DEBUG1)
-           trace << PSTR("Idx :") << idx << endl;
-          #endif
+#if defined(DEBUG1)
+            trace << PSTR("Idx :") << idx << endl;
+#endif
           }
 
 
           for (int j = 0; j < 96; j++) buf[j] = 0;
           i = 0;
-         // #if defined(DEBUG1)
-      //  trace << endl;
-      //  #endif
         }
       }
 #if defined(DEBUG1)
@@ -295,7 +301,7 @@ void setup()
 
   // Initialise pin type
 
-  
+
 
   ASSERT(ethernet.begin(ip, subnet));
   initPin();
@@ -315,18 +321,20 @@ void loop()
 #endif
   while (Event::queue.dequeue( &event ))
     event.dispatch();
-  //if (Event::queue.available() > 0 ) Event::queue.await(&event); //Event::queue.await(&event);
- // event.dispatch();
+#if defined(SENSOR_ON)
   uint32_t time_tmp = Watchdog::millis();
-  if (time_tmp - time > 5 * 60 * 1000 ) {
+  if (time_tmp - time > ((uint32_t)5 * 60 * 1000 )) {
     sensorsConvert();
     requestDone = true;
     time = time_tmp;
   }
-  if (time_tmp - time >  5 * 1000 && requestDone == true) {
-    readSensors();
-    requestDone == false;
+  if ( requestDone == true ) {
+    if (time_tmp - time >  5 * 1000) {
+      readSensors();
+      requestDone = false;
+    }
   }
+#endif
 #if defined(DEBUG2)
   trace << PSTR(".") ;
 #endif
@@ -362,7 +370,7 @@ void CmdExecute(int pin, int cmd ) {
   }
 }
 
-// Initialise pin change it to your configuration
+// Initialise pin, change it to your configuration
 void initPin()
 {
 
@@ -419,44 +427,44 @@ void pinTelerupteur(int pin)
 }
 void pinMCPUp(int pin)
 {
-  #if defined(DEBUG1)
+#if defined(DEBUG1)
   trace << PSTR( "MCPUP : ") << pin <<  endl;
 #endif
   MCP23017 *mcp = NULL;
   if (pin >= 0 && pin < 16)
   {
-    mcp=&mcp1;
+    mcp = &mcp1;
     trace << PSTR( "MCP1 doing : ") << PSTR( "MCP GPIO Val : ") << mcp->readGPIOAB() << endl;
   }
   else if (pin >= 16 && pin < 32)
   {
-    mcp=&mcp2;
+    mcp = &mcp2;
     pin = pin - 16;
-    }
-  else if( mcp == NULL ) return;
-  mcp->pinMode(pin,OUTPUT);
-  mcp->digitalWrite(pin,HIGH);
+  }
+  else if ( mcp == NULL ) return;
+  mcp->pinMode(pin, OUTPUT);
+  mcp->digitalWrite(pin, HIGH);
   trace << PSTR( "MCP GPIO Val : ") << mcp->readGPIOAB() << endl;
-  
+
 }
 void pinMCPDown(int pin)
 {
-   #if defined(DEBUG1)
+#if defined(DEBUG1)
   trace << PSTR( "MCPDOWN : ") << pin << endl;
 #endif
   MCP23017 *mcp = NULL;
   if (pin >= 0 && pin < 16)
   {
-    mcp=&mcp1;
+    mcp = &mcp1;
   }
   else if (pin >= 16 && pin < 32)
   {
-    mcp=&mcp2;
+    mcp = &mcp2;
     pin = pin - 16;
-    }
-  else if( mcp == NULL ) return;
-  mcp->pinMode(pin,OUTPUT);
-  mcp->digitalWrite(pin,LOW);
+  }
+  else if ( mcp == NULL ) return;
+  mcp->pinMode(pin, OUTPUT);
+  mcp->digitalWrite(pin, LOW);
 }
 void executeButton(int pin, bool state)
 {
