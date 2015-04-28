@@ -17,8 +17,6 @@
 #include "Cosa/INET.hh"
 #include "Cosa/INET/HTTP.hh"
 #include "Cosa/String.hh"
-#include "Cosa/OWI/Driver/DS18B20.hh"
-#include "Cosa/Driver/DHT.hh"
 #include "Cosa/Memory.h"
 #include "MCP23017.h"
 
