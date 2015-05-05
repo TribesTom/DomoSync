@@ -164,9 +164,6 @@ void WebClient::on_response(const char* hostname, const char* path)
       while ((res = m_sock->getchar()) >= 0) {
         buf[i] = res;
         i++;
-        // #if defined(DEBUG1)
-        // trace << res;
-        //  #endif
         if (res == '\n')
         {
 #if defined(DEBUG1)
@@ -225,13 +222,15 @@ class PushButton : public Button {
     bool state;
     int idx;
     int hummanPin;
-    PushButton(Board::DigitalPin pin, Button::Mode mode, int idxtmp, int humman) :
+    uint32_t relais;
+    PushButton(Board::DigitalPin pin, Button::Mode mode, int idxtmp, int humman, uint32_t relaisNew) :
       Button(pin, mode),
       state(false)
     {
 
       idx = idxtmp;
       hummanPin = humman;
+      relais = relaisNew;
 
     }
     virtual void on_change(uint8_t type)
@@ -240,20 +239,21 @@ class PushButton : public Button {
       trace << PSTR("Button : on_change : hummanpin : ") << hummanPin << PSTR(" Internal Pin : ") << get_pin() << endl ;
 #endif
       UNUSED(type);
+      if (state == true ) {
+
+        for (int i = 0; i < 32; i++)
+          if (bit_get(i, relais)) pinMCPUp(i);
+      }
+      else {
+        for (int i = 0; i < 32; i++)
+          if (bit_get(i, relais)) pinMCPDown(i);
+      }
       state = !state;
       executeButton(hummanPin, state);
     }
 };
 
-class DS18B20E : public DS18B20 {
-  public :
-    int idx;
-    DS18B20E(OWI *pin, const char *name = NULL, int idxtmp = 0) :
-      DS18B20(pin, name)
-    {
-      idx = idxtmp;
-    }
-};
+
 
 
 // Definition du webserver
@@ -262,17 +262,6 @@ WebServer server;
 // Definition du web client
 WebClient client;
 
-// Sensors definitions
-
-DS18B20E* temp[10] = { NULL};
-OWI* owiCannal[10] = { NULL};
-DHT22* dht22Dev[10] = { NULL};
-bool requestDone = false;
-
-// Tableau état des telerupteurs
-
-bool telerupteur[100] = {false};
-
 // Extension I2C MCP23017
 
 MCP23017 mcp1(0);
@@ -280,10 +269,13 @@ MCP23017 mcp2(1);
 
 Event event;
 
+// Define pointer button
+
+PushButton *buttonList[50];
 
 // Define button
+PushButton buttonElec(Board::D22, Button::ON_FALLING_MODE, 8, 22, 8);
 
-PushButton buttonElec(Board::D22, Button::ON_FALLING_MODE, 8, 22);
 
 void setup()
 {
@@ -319,20 +311,6 @@ void loop()
 #endif
   while (Event::queue.dequeue( &event ))
     event.dispatch();
-#if defined(SENSOR_ON)
-  uint32_t time_tmp = Watchdog::millis();
-  if (time_tmp - time > ((uint32_t)5 * 60 * 1000 )) {
-    sensorsConvert();
-    requestDone = true;
-    time = time_tmp;
-  }
-  if ( requestDone == true ) {
-    if (time_tmp - time >  5 * 1000) {
-      readSensors();
-      requestDone = false;
-    }
-  }
-#endif
 #if defined(DEBUG2)
   trace << PSTR(".") ;
 #endif
@@ -352,10 +330,10 @@ void CmdExecute(int pin, int cmd ) {
       pinDown(pin);
       break;
     case 3:
-      pinTelerupteurUp(pin);
+      pinButtonUp(pin);
       break;
     case 4:
-      pinTelerupteurDown(pin);
+      pinButtonDown(pin);
       break;
     case 5:
       pinMCPUp(pin);
@@ -363,6 +341,9 @@ void CmdExecute(int pin, int cmd ) {
     case 6:
       pinMCPDown(pin);
       break;
+    case 7:
+      pinButton(pin);
+      break; 
     default :
       break;
   }
@@ -384,16 +365,17 @@ void initPin()
 #endif
   client.get("http://192.168.1.101:8080/json.htm?type=devices&rid=7");
   trace << PSTR("Client Value 24 :") << client.value << endl;
-  telerupteur[24] = client.value;
+  //telerupteur[24] = client.value;
   client.get("http://192.168.1.101:8080/json.htm?type=devices&rid=8");
   trace << PSTR("Client Value 25 :") << client.value << endl;
-  telerupteur[25] = client.value;
+  //telerupteur[25] = client.value;
 
 
   client.end();
   client.etat = -1;
   sleep(5);
   mcp1.begin();
+  buttonList[22] = &buttonElec;
 
 }
 void pinUp(int pin)
@@ -404,25 +386,15 @@ void pinDown(int pin)
 {
   OutputPin((Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]), 0);
 }
-void pinTelerupteurUp(int pin)
+void pinButtonUp(int pin)
 {
-  if (telerupteur[pin] == false) pinTelerupteur(pin);
-  telerupteur[pin] = true;
+
 }
-void pinTelerupteurDown(int pin)
+void pinButtonDown(int pin)
 {
-  if (telerupteur[pin] == true) pinTelerupteur(pin);
-  telerupteur[pin] = false;
+
 }
-void pinTelerupteur(int pin)
-{
-#if defined(DEBUG1)
-  trace << PSTR( "Pin Telerupteur Pin : ") << pin << PSTR(" digital pin map : ") << (Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]) << endl;
-#endif
-  OutputPin OPin = OutputPin((Board::DigitalPin) pgm_read_byte(&digital_pin_map[pin]), 0);
-  delay(500);
-  OPin.write(1);
-}
+
 void pinMCPUp(int pin)
 {
 #if defined(DEBUG1)
@@ -485,40 +457,11 @@ void executeButton(int pin, bool state)
   client.end();
   client.etat = -1;
 }
-void sensorsConvert()
+void pinButton(int humanPin)
 {
-  ds18b20convert();
-
+  buttonList[humanPin]->on_change(0);
 }
-void ds18b20convert()
-{
-  for (uint8_t i = 0; i < membersof(owiCannal); i++) {
-    if (owiCannal[i] != NULL) DS18B20::convert_request(owiCannal[i], 12, true);
-  }
-}
-void readSensors()
-{
 
-  for (uint8_t i = 0; i < membersof(temp); i++) {
-    if (temp[i] != NULL) temp[i]->read_scratchpad();
 
-  }
-  client.begin(ethernet.socket(Socket::TCP));
-  for (uint8_t i = 0; i < membersof(temp); i++) {
-    if (temp[i] != NULL) {
-      sendJsonTemp(temp[i]->idx, temp[i]->get_temperature ());
-    }
 
-  }
-  client.end();
-  client.etat = -1;
-}
-void sendJsonTemp(int idx, int16_t temperature)
-{
-  String command = "http://192.168.1.101json.htm?type=command&param=udevice&idx=";
-  command += String(idx);
-  command += "&nvalue=0&svalue=";
-  command += String(temperature);
-  client.get(command.c_str());
-}
 
