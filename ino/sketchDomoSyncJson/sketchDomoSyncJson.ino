@@ -7,39 +7,95 @@ sync with domoticz
 
 Using COSA libraries : https://github.com/mikaelpatel/Cosa/
 
-MCP1:01 -> rez, hall entree
-MCP1:02 -> rez, toilette
-MCP1:03 -> rez, salon1
-MCP1:04 -> rez, salon2
-MCP1:05 -> rez, salon petite lampe
-MCP1:06 -> rez, salle a manger
-MCP1:07 -> rez, salle a manger petite lampe
-MCP1:08 -> rez, cuisine ilot central
-MCP1:09 -> rez, cuisine plan de travail
-MCP1:10 -> rez, buandrie
-MCP1:11 -> rez, salon bureau
-MCP1:12 -> exterieur sud
-MCP1:13 -> exterieur porche
-MCP1:14 -> exterieur rue
-MCP1:15 -> exterieur ouest
-MCP1:16 -> escalier etage
+MCP1:00 -> rez, hall entree
+MCP1:01 -> rez, toilette
+MCP1:02 -> rez, salon1
+MCP1:03 -> rez, salon2
+MCP1:04 -> rez, salon petite lampe
+MCP1:05 -> rez, salle a manger
+MCP1:06 -> rez, salle a manger petite lampe
+MCP1:07 -> rez, cuisine ilot central
+MCP1:08 -> rez, cuisine plan de travail
+MCP1:09 -> rez, buandrie
+MCP1:10 -> rez, salon bureau
+MCP1:11 -> exterieur sud
+MCP1:12 -> exterieur porche
+MCP1:13 -> exterieur rue
+MCP1:14 -> exterieur ouest
+MCP1:15 -> escalier etage
 
-MCP2:01 -> cave nord
-MCP2:02 -> cave sud
-MCP2:03 -> cave milieu
-MCP2:04 -> escalier cave
-MCP2:05 -> etage, couloir
-MCP2:06 -> etage, ch parent centrale
-MCP2:07 -> etage, ch parent lit
-MCP2:08 -> etage, ch enfant 1 centrale
-MCP2:09 -> etage, ch enfant 1 lit
-MCP2:10 -> etage, ch enfant 2 centrale
-MCP2:11 -> etage, ch enfant 2 lit
-MCP2:12 -> etage, bureau
-MCP2:13 -> etage salle de bain 1
-MCP2:14 -> etage salle de bain 2
-MCP2:15 -> etage salle de douche
-MCP2:16 -> etage wc
+
+MCP2:00 -> cave nord
+MCP2:01 -> cave sud
+MCP2:02 -> cave milieu
+MCP2:03 -> escalier cave
+MCP2:04 -> etage, couloir
+MCP2:05 -> etage, ch parent centrale
+MCP2:06 -> etage, ch parent lit
+MCP2:07 -> etage, ch enfant 1 centrale
+MCP2:08 -> etage, ch enfant 1 lit
+MCP2:09 -> etage, ch enfant 2 centrale
+MCP2:10 -> etage, ch enfant 2 lit
+MCP2:11 -> etage, bureau
+MCP2:12 -> etage salle de bain 1
+MCP2:13 -> etage salle de bain 2
+MCP2:14 -> etage salle de douche
+MCP2:15 -> etage wc
+
+PIN00 -> rx
+PIN01 -> tx
+PIN02 -> 
+PIN03 ->
+PIN04 ->
+PIN05 ->
+PIN06 ->
+PIN07 ->
+PIN08 ->
+PIN09 ->
+PIN10 ->
+PIN11 ->
+PIN12 ->
+PIN13 ->
+PIN14 ->
+PIN15 ->
+PIN16 ->
+PIN17 ->
+PIN18 ->
+PIN19 ->
+PIN20 -> i2c
+PIN21 -> i2c
+PIN22 ->
+PIN23 ->
+PIN24 ->
+PIN25 ->
+PIN26 ->
+PIN27 ->
+PIN28 ->
+PIN29 ->
+PIN30 ->
+PIN31 ->
+PIN32 ->
+PIN33 ->
+PIN34 ->
+PIN35 ->
+PIN36 ->
+PIN37 ->
+PIN38 ->
+PIN39 ->
+PIN40 ->
+PIN41 ->
+PIN42 ->
+PIN43 ->
+PIN44 ->
+PIN45 ->
+PIN46 ->
+PIN47 ->
+PIN48 ->
+PIN49 ->
+PIN50 ->
+PIN51 ->
+PIN52 ->
+PIN53 ->
 
 */
 #include "Cosa/EEPROM.hh"
