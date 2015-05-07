@@ -1,3 +1,47 @@
+/*
+DomoSynJson 
+
+Domotic for home
+
+sync with domoticz
+
+Using COSA libraries : https://github.com/mikaelpatel/Cosa/
+
+MCP1:01 -> rez, hall entree
+MCP1:02 -> rez, toilette
+MCP1:03 -> rez, salon1
+MCP1:04 -> rez, salon2
+MCP1:05 -> rez, salon petite lampe
+MCP1:06 -> rez, salle a manger
+MCP1:07 -> rez, salle a manger petite lampe
+MCP1:08 -> rez, cuisine ilot central
+MCP1:09 -> rez, cuisine plan de travail
+MCP1:10 -> rez, buandrie
+MCP1:11 -> rez, salon bureau
+MCP1:12 -> exterieur sud
+MCP1:13 -> exterieur porche
+MCP1:14 -> exterieur rue
+MCP1:15 -> exterieur ouest
+MCP1:16 -> escalier etage
+
+MCP2:01 -> cave nord
+MCP2:02 -> cave sud
+MCP2:03 -> cave milieu
+MCP2:04 -> escalier cave
+MCP2:05 -> etage, couloir
+MCP2:06 -> etage, ch parent centrale
+MCP2:07 -> etage, ch parent lit
+MCP2:08 -> etage, ch enfant 1 centrale
+MCP2:09 -> etage, ch enfant 1 lit
+MCP2:10 -> etage, ch enfant 2 centrale
+MCP2:11 -> etage, ch enfant 2 lit
+MCP2:12 -> etage, bureau
+MCP2:13 -> etage salle de bain 1
+MCP2:14 -> etage salle de bain 2
+MCP2:15 -> etage salle de douche
+MCP2:16 -> etage wc
+
+*/
 #include "Cosa/EEPROM.hh"
 #include "Cosa/AnalogPin.hh"
 #include "Cosa/IOStream/Driver/UART.hh"
