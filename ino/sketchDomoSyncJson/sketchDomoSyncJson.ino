@@ -170,8 +170,7 @@ class WebServer : public HTTP::Server {
     uint16_t m_nr;
 };
 
-void
-WebServer::on_request(IOStream& page, char* method, char* path, char* query)
+void WebServer::on_request(IOStream& page, char* method, char* path, char* query)
 {
 
 #if defined(DEBUG1)
@@ -349,7 +348,7 @@ class PushButton : public Button {
           if (bit_get(i, relais)) pinMCPDown(i);
       }
       state = !state;
-      executeButton(hummanPin, state);
+      executeButton(hummanPin, state, idx);
     }
 };
 
@@ -374,7 +373,7 @@ Event event;
 PushButton *buttonList[50];
 
 // Define button
-PushButton buttonElec(Board::D22, Button::ON_FALLING_MODE, 8, 22, 8);
+PushButton buttonElec(Board::D22, Button::ON_FALLING_MODE, 8, 22, 0x0F);
 
 
 void setup()
@@ -536,24 +535,25 @@ void pinMCPDown(int pin)
   mcp->pinMode(pin, OUTPUT);
   mcp->digitalWrite(pin, LOW);
 }
-void executeButton(int pin, bool state)
+void executeButton(int pin, bool state, int idx)
 {
 #if defined(DEBUG1)
   trace << ("Buton:ExecuteButton: client begin ") << endl ;
 #endif
   client.begin(ethernet.socket(Socket::TCP));
   client.typeClient = UPDATE;
-  switch (pin)
-  {
-    case 22:
+  String Buffer = PSTR("http://192.168.1.101:8080/json.htm?type=command&param=switchlight&idx=");
+  Buffer += idx;
+  
 #if defined(DEBUG1)
-      trace << ("Buton: Case 22 : client get, state : ") << state << endl ;
+      trace << PSTR("Buton: Idx ")<< idx << PSTR(" client get, state : ") << state << endl ;
 #endif
-      if (state) client.get("http://192.168.1.101:8080/json.htm?type=command&param=switchlight&idx=8&switchcmd=On&level=0&passcode=");
-      else client.get("http://192.168.1.101:8080/json.htm?type=command&param=switchlight&idx=8&switchcmd=Off&level=0&passcode=");
-      break;
+      if (state) Buffer += PSTR("&switchcmd=On&level=0&passcode=");
+      else Buffer += PSTR("&switchcmd=Off&level=0&passcode=");
 
-  }
+     
+
+  client.get(Buffer.c_str());
   client.end();
   client.etat = -1;
 }
