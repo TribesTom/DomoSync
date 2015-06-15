@@ -121,7 +121,7 @@ PIN53 ->
 #include "MCP23017.h"
 
 // EEPROM variable
-#define DEBUG1
+//#define DEBUG1
 #define USE_ETHERNET_SHIELD
 #if defined(USE_ETHERNET_SHIELD)
 OutputPin sd(Board::D4, 1);
@@ -335,17 +335,19 @@ class PushButton : public Button {
     virtual void on_change(uint8_t type)
     {
 #if defined(DEBUG1)
-      trace << PSTR("Button : on_change : hummanpin : ") << hummanPin << PSTR(" Internal Pin : ") << get_pin() << endl ;
+      trace << PSTR("Button : on_change : hummanpin : ") << hummanPin << PSTR(" Internal Pin : ") << get_pin() << PSTR(" Relais value : ") << relais << endl ;
 #endif
       UNUSED(type);
-      if (state == true ) {
+      
+      if (state == false ) {
 
         for (int i = 0; i < 32; i++)
-          if (bit_get(i, relais)) pinMCPUp(i);
+          
+          if (bit_get(relais,i)) pinMCPUp(i);
       }
       else {
         for (int i = 0; i < 32; i++)
-          if (bit_get(i, relais)) pinMCPDown(i);
+          if (bit_get(relais,i)) pinMCPDown(i);
       }
       state = !state;
       executeButton(hummanPin, state, idx);
@@ -373,8 +375,8 @@ Event event;
 PushButton *buttonList[50];
 
 // Define button
-PushButton buttonElec(Board::D22, Button::ON_FALLING_MODE, 8, 22, 0x0F);
-
+PushButton buttonElec(Board::D22, Button::ON_FALLING_MODE, 7, 22, 0x0000FFFF);
+PushButton buttonElec2(Board::D23, Button::ON_FALLING_MODE, 8, 23, 0x00005555);
 
 void setup()
 {
@@ -393,12 +395,21 @@ void setup()
 
 
   ASSERT(ethernet.begin(ip, subnet));
-  initPin();
+
+ 
   // Start the server
   ASSERT(server.begin(ethernet.socket(Socket::TCP, PORT)));
 #if defined(DEBUG1)
   trace << PSTR("End setup, Serve listening on ") << ip << PORT;
 #endif
+#if defined(DEBUG1)
+  trace << PSTR("Wait 2 sec ethernet ") ;
+  
+#endif  
+  sleep(2);
+
+  // initialisation 
+  initPin();
 }
 
 
@@ -451,23 +462,24 @@ void CmdExecute(int pin, int cmd ) {
 // Initialise pin, change it to your configuration
 void initPin()
 {
-
-  buttonElec.begin();
+ buttonElec.begin();
+ buttonElec2.begin();
 #if defined(DEBUG1)
-  trace << ("Get Pin Info ") << endl ;
+  trace << PSTR("Udate domoticz with 0 value ") << endl ;
 #endif
   client.begin(ethernet.socket(Socket::TCP));
-  client.typeClient = GETSTAT;
-
+  client.typeClient = UPDATE;
+  sleep(5);
 #if defined(DEBUG1)
   trace << ("Telerupteur Pins ") << endl ;
 #endif
-  client.get("http://192.168.1.101:8080/json.htm?type=devices&rid=7");
-  trace << PSTR("Client Value 24 :") << client.value << endl;
-  //telerupteur[24] = client.value;
-  client.get("http://192.168.1.101:8080/json.htm?type=devices&rid=8");
-  trace << PSTR("Client Value 25 :") << client.value << endl;
-  //telerupteur[25] = client.value;
+  client.get(formBufferOff(buttonElec.idx).c_str());
+ 
+  trace << PSTR("Client 22 ") << endl;
+  
+  client.get(formBufferOff(buttonElec2.idx).c_str());
+  trace << PSTR("Client 23 :") << endl;
+ 
 
 
   client.end();
@@ -475,7 +487,21 @@ void initPin()
   sleep(5);
   mcp1.begin();
   buttonList[22] = &buttonElec;
+ #if defined(DEBUG1)
+  trace << ("ButtonElec ") << buttonElec.relais << endl ;
+  trace << ("ButtonElec2 ") << buttonElec2.relais << endl ;
+#endif 
+  buttonList[23] = &buttonElec2;
 
+}
+
+String formBufferOff(int idx)
+{
+  String Buffer = PSTR("http://192.168.1.101:8080/json.htm?type=command&param=udevice&idx=");
+  Buffer += idx;
+  Buffer += PSTR("&nvalue=0&svalue=");
+  trace << Buffer << endl;
+  return Buffer;
 }
 void pinUp(int pin)
 {
@@ -503,7 +529,9 @@ void pinMCPUp(int pin)
   if (pin >= 0 && pin < 16)
   {
     mcp = &mcp1;
+    #if defined(DEBUG1)
     trace << PSTR( "MCP1 doing : ") << PSTR( "MCP GPIO Val : ") << mcp->readGPIOAB() << endl;
+    #endif
   }
   else if (pin >= 16 && pin < 32)
   {
@@ -513,7 +541,9 @@ void pinMCPUp(int pin)
   else if ( mcp == NULL ) return;
   mcp->pinMode(pin, OUTPUT);
   mcp->digitalWrite(pin, HIGH);
+   #if defined(DEBUG1)
   trace << PSTR( "MCP GPIO Val : ") << mcp->readGPIOAB() << endl;
+  #endif
 
 }
 void pinMCPDown(int pin)
@@ -542,17 +572,17 @@ void executeButton(int pin, bool state, int idx)
 #endif
   client.begin(ethernet.socket(Socket::TCP));
   client.typeClient = UPDATE;
-  String Buffer = PSTR("http://192.168.1.101:8080/json.htm?type=command&param=switchlight&idx=");
+  String Buffer = PSTR("http://192.168.1.101:8080/json.htm?type=command&param=udevice&idx=");
   Buffer += idx;
   
 #if defined(DEBUG1)
       trace << PSTR("Buton: Idx ")<< idx << PSTR(" client get, state : ") << state << endl ;
 #endif
-      if (state) Buffer += PSTR("&switchcmd=On&level=0&passcode=");
-      else Buffer += PSTR("&switchcmd=Off&level=0&passcode=");
+      if (state) Buffer += PSTR("&nvalue=1&svalue=");
+      else Buffer += PSTR("&nvalue=0&svalue=");
 
      
-
+   trace << Buffer << endl;
   client.get(Buffer.c_str());
   client.end();
   client.etat = -1;
