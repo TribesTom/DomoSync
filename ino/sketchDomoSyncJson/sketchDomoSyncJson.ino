@@ -113,9 +113,12 @@ PIN53 ->
 #include "Cosa/InputPin.hh"
 #include "Cosa/Event.hh"
 #include "Cosa/PWMPin.hh"
-#include "Cosa/Socket/Driver/W5100.hh"
+
 #include "Cosa/INET.hh"
-#include "Cosa/INET/HTTP.hh"
+#include <DNS.h>
+#include <DHCP.h>
+#include <HTTP.h>
+#include <W5100.h>
 #include "Cosa/String.hh"
 #include "Cosa/Memory.h"
 #include "MCP23017.h"
